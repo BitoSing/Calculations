@@ -76,8 +76,8 @@
             margin-bottom: 1em;
         }
         h2 {
-            margin-bottom: 0;
-            font-size: 20px;
+            margin-bottom: 0.5em;
+            font-size: 1.5em;
             text-align: left;
         }
         .table-container h2 {
@@ -108,20 +108,24 @@
             }
             .form-group label {
                 margin-bottom: 0.5em;
-                font-weight: bold;
+                font-weight: regular;
+                font-size: 15px;
             }
             .form-group input {
                 padding: 0.5em;
-                font-size: 1em;
+                font-size: 0.5em;
                 border: 1px solid #ddd;
                 border-radius: 4px;
                 margin-bottom: 1em;
             }
             .result {
                 margin-top: 1em;
-                font-size: 1.2em;
+                font-size: 0.2em;
                 font-weight: bold;
                 color: #333;
+            }
+            h2 {
+                font-size: 2em;
             }
         }
     </style>
@@ -166,6 +170,36 @@
                 losingProfitElement.className = losingProfit < originalPrice ? 'loss' : 'profit';
             }
         }
+
+        // Ensure mobile view inputs trigger the same calculations
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileOriginalPrice = document.getElementById('mobileOriginalPrice');
+            const mobileDiscountPercent = document.getElementById('mobileDiscountPercent');
+            const mobileOriginalPrice2 = document.getElementById('mobileOriginalPrice2');
+            const mobilePriceAfterDiscount = document.getElementById('mobilePriceAfterDiscount');
+
+            if (mobileOriginalPrice && mobileDiscountPercent) {
+                mobileOriginalPrice.addEventListener('input', function() {
+                    document.getElementById('originalPrice').value = mobileOriginalPrice.value;
+                    calculateDiscount();
+                });
+                mobileDiscountPercent.addEventListener('input', function() {
+                    document.getElementById('discountPercent').value = mobileDiscountPercent.value;
+                    calculateDiscount();
+                });
+            }
+
+            if (mobileOriginalPrice2 && mobilePriceAfterDiscount) {
+                mobileOriginalPrice2.addEventListener('input', function() {
+                    document.getElementById('originalPrice2').value = mobileOriginalPrice2.value;
+                    calculateDiscount2();
+                });
+                mobilePriceAfterDiscount.addEventListener('input', function() {
+                    document.getElementById('priceAfterDiscount').value = mobilePriceAfterDiscount.value;
+                    calculateDiscount2();
+                });
+            }
+        });
     </script>
 </head>
 <body>
@@ -177,9 +211,9 @@
             <h2>Find Discount Price</h2>
             <table>
                 <tr>
-                    <th>Original Price</th>
-                    <th>Discount (%)</th>
-                    <th>Result After Disc.</th>
+                    <th>Original Price<br>ថ្លៃដើម</th>
+                    <th>Discount (%)​<br>បញ្ចុះភាគរយ</th>
+                    <th>Result After Discount<br>លទ្ធផលបន្ទាប់ពីការបញ្ចុះភាគរយ</th>
                     <th>Losing Profit</th>
                 </tr>
                 <tr>
@@ -190,13 +224,13 @@
                 </tr>
             </table>
             <div class="form-group">
-                <label for="originalPrice">Original Price</label>
-                <input type="number" id="originalPrice" oninput="calculateDiscount()" placeholder="$">
-                <label for="discountPercent">Discount (%)</label>
-                <input type="number" id="discountPercent" oninput="calculateDiscount()" placeholder="%">
+                <label for="mobileOriginalPrice">Original Price <br> ថ្លៃដើម</label>
+                <input type="number" id="mobileOriginalPrice" placeholder="$" oninput="calculateDiscount()">
+                <label for="mobileDiscountPercent">Discount (%) <br> បញ្ចុះភាគរយ</label>
+                <input type="number" id="mobileDiscountPercent" placeholder="%" oninput="calculateDiscount()">
                 <div class="result">
-                    <p>Result After Discount: <span id="resultAfterDiscount">$0.00</span></p>
-                    <p>Losing Profit: <span id="losingProfit" class="profit">$0.00</span></p>
+                    <p>Result After Discount: <br>លទ្ធផលបន្ទាប់ពីការបញ្ចុះភាគរយ: <span id="mobileResultAfterDiscount">$0.00</span></p>
+                    <p>Losing Profit: <span id="mobileLosingProfit" class="profit">$0.00</span></p>
                 </div>
             </div>
         </div>
@@ -204,9 +238,9 @@
             <h2>Find Discount %</h2>
             <table>
                 <tr>
-                    <th>Original Price</th>
-                    <th>Price After Discount</th>
-                    <th>Result of Discount (%)</th>
+                    <th>Original Price<br>ថ្លៃដើម</th>
+                    <th>Price after discount​<br>តម្លៃលក់ចេញ</th>
+                    <th>Result Discount<br>លទ្ធផលការបញ្ចុះភាគរយ</th>
                     <th>Losing Profit</th>
                 </tr>
                 <tr>
@@ -217,13 +251,13 @@
                 </tr>
             </table>
             <div class="form-group">
-                <label for="originalPrice2">Original Price</label>
-                <input type="number" id="originalPrice2" oninput="calculateDiscount2()" placeholder="$">
-                <label for="priceAfterDiscount">Price After Discount</label>
-                <input type="number" id="priceAfterDiscount" oninput="calculateDiscount2()" placeholder="$">
+                <label for="mobileOriginalPrice2">Original Price <br> ថ្លៃដើម</label>
+                <input type="number" id="mobileOriginalPrice2" placeholder="$" oninput="calculateDiscount2()">
+                <label for="mobilePriceAfterDiscount">Price After Discount<br>តម្លៃបន្ទាប់ពីការបញ្ចុះភាគរយ:</label>
+                <input type="number" id="mobilePriceAfterDiscount" placeholder="$" oninput="calculateDiscount2()">
                 <div class="result">
-                    <p>Result of Discount: <span id="resultOfDiscount">$0.00</span></p>
-                    <p>Losing Profit: <span id="losingProfit2" class="profit">$0.00</span></p>
+                    <p>Result of Discount: <br>លទ្ធផលបន្ទាប់ពីការបញ្ចុះភាគរយ:<span id="mobileResultOfDiscount">$0.00</span></p>
+                    <p>Losing Profit: <span id="mobileLosingProfit2" class="profit">$0.00</span></p>
                 </div>
             </div>
         </div>
