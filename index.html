@@ -6,42 +6,52 @@
     <title>Calculation</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #f0f0f0;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            padding-bottom: 60px; /* Ensure space for the fixed footer */
+            justify-content: center;
+            min-height: 100vh;
         }
-        header, footer {
-            background-color: #333;
-            color: white;
+        .container {
+            width: 70%;
+            margin: 20px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            display: flex;
+            gap: 20px;
+            flex-direction: column;
+            align-items: left;
+        }
+        h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 20px;
             text-align: center;
-            padding: 1em 0;
-            width: 100%;
         }
         table {
             width: 100%;
-            max-width: 600px;
             border-collapse: collapse;
             background-color: white;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            margin: 1em auto;
+            margin: 0.5em 0;
+            text-align: left;
         }
         th, td {
             border: 1px solid #ddd;
             padding: 12px;
-            text-align: left;
-            width: 95px;
+            text-align: center;
+            width: 25%;
             white-space: nowrap;
         }
         th {
             background-color: #4CAF50;
             color: white;
             height: 25px;
-            text-align: center;
         }
         td {
             height: 20px;
@@ -59,53 +69,59 @@
             color: #042940;
             font-weight: bold;
         }
-        footer {
-            background-color: #333;
-            color: white;
-            text-align: center;
-            padding: 1em 0;
-            position: fixed;
-            width: 100%;
-            bottom: 0;
-        }
-        .container {
-            display: flex;
-            justify-content: center;
-            width: 100%;
-            gap: 3em;
-            padding: 1em;
-        }
         .table-container {
-            width: 50%;
             display: flex;
-            flex-direction: row;
-            align-items: center;
-            margin-bottom: 2em;
+            flex-direction: column;
+            align-items: left;
+            margin-bottom: 1em;
+        }
+        h2 {
+            margin-bottom: 0;
+            font-size: 20px;
+            text-align: left;
+        }
+        .table-container h2 {
+            text-align: left;
+            width: 100%;
+            max-width: 600px;
+        }
+        .form-group {
+            display: none;
         }
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
-                align-items: center;
-                gap: 1em;
+                margin: 10px;
+                width: 90%;
             }
             .table-container {
                 width: 100%;
                 margin-bottom: 2em;
             }
             table {
-                width: 100%;
-                overflow-x: auto;
-                display: block;
+                display: none;
             }
-            th, td {
-                padding: 8px;
-                font-size: 14px;
+            .form-group {
+                display: flex;
+                flex-direction: column;
+                margin-bottom: 1em;
             }
-            th {
-                height: 30px;
+            .form-group label {
+                margin-bottom: 0.5em;
+                font-weight: bold;
             }
-            td {
-                height: 25px;
+            .form-group input {
+                padding: 0.5em;
+                font-size: 1em;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                margin-bottom: 1em;
+            }
+            .result {
+                margin-top: 1em;
+                font-size: 1.2em;
+                font-weight: bold;
+                color: #333;
             }
         }
     </style>
@@ -153,12 +169,12 @@
     </script>
 </head>
 <body>
-    <header>
-        <h1>Calculation</h1>
-    </header>
     <div class="container">
-        <div class="table-container: Center">
-            <h2 style="text-align: center;">Find Discount Price</h2>
+        <header>
+            <h1>Calculation</h1>
+        </header>
+        <div class="table-container">
+            <h2>Find Discount Price</h2>
             <table>
                 <tr>
                     <th>Original Price</th>
@@ -167,15 +183,25 @@
                     <th>Losing Profit</th>
                 </tr>
                 <tr>
-                    <td><input type="number" id="originalPrice" oninput="calculateDiscount()" placeholder="$"></td>
-                    <td><input type="number" id="discountPercent" oninput="calculateDiscount()" placeholder="%"></td>
-                    <td id="resultAfterDiscount">$0.00</td>
-                    <td id="losingProfit" class="profit">$0.00</td>
+                    <td data-label="Original Price"><input type="number" id="originalPrice" oninput="calculateDiscount()" placeholder="$"></td>
+                    <td data-label="Discount (%)"><input type="number" id="discountPercent" oninput="calculateDiscount()" placeholder="%"></td>
+                    <td data-label="Result After Disc." id="resultAfterDiscount">$0.00</td>
+                    <td data-label="Losing Profit" id="losingProfit" class="profit">$0.00</td>
                 </tr>
             </table>
+            <div class="form-group">
+                <label for="originalPrice">Original Price</label>
+                <input type="number" id="originalPrice" oninput="calculateDiscount()" placeholder="$">
+                <label for="discountPercent">Discount (%)</label>
+                <input type="number" id="discountPercent" oninput="calculateDiscount()" placeholder="%">
+                <div class="result">
+                    <p>Result After Discount: <span id="resultAfterDiscount">$0.00</span></p>
+                    <p>Losing Profit: <span id="losingProfit" class="profit">$0.00</span></p>
+                </div>
+            </div>
         </div>
-        <div class="table-container: Center">
-            <h2 style="text-align: center;">Find Discount %</h2>
+        <div class="table-container">
+            <h2>Find Discount %</h2>
             <table>
                 <tr>
                     <th>Original Price</th>
@@ -184,16 +210,23 @@
                     <th>Losing Profit</th>
                 </tr>
                 <tr>
-                    <td><input type="number" id="originalPrice2" oninput="calculateDiscount2()" placeholder="$"></td>
-                    <td><input type="number" id="priceAfterDiscount" oninput="calculateDiscount2()" placeholder="$"></td>
-                    <td id="resultOfDiscount">$0.00</td>
-                    <td id="losingProfit2" class="profit">$0.00</td>
+                    <td data-label="Original Price"><input type="number" id="originalPrice2" oninput="calculateDiscount2()" placeholder="$"></td>
+                    <td data-label="Price After Discount"><input type="number" id="priceAfterDiscount" oninput="calculateDiscount2()" placeholder="$"></td>
+                    <td data-label="Result of Discount (%)" id="resultOfDiscount">$0.00</td>
+                    <td data-label="Losing Profit" id="losingProfit2" class="profit">$0.00</td>
                 </tr>
             </table>
+            <div class="form-group">
+                <label for="originalPrice2">Original Price</label>
+                <input type="number" id="originalPrice2" oninput="calculateDiscount2()" placeholder="$">
+                <label for="priceAfterDiscount">Price After Discount</label>
+                <input type="number" id="priceAfterDiscount" oninput="calculateDiscount2()" placeholder="$">
+                <div class="result">
+                    <p>Result of Discount: <span id="resultOfDiscount">$0.00</span></p>
+                    <p>Losing Profit: <span id="losingProfit2" class="profit">$0.00</span></p>
+                </div>
+            </div>
         </div>
     </div>
-    <footer>
-        <p>&copy; 2023 Discount Price Calculator. All rights reserved.</p>
-    </footer>
 </body>
 </html>
