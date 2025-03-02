@@ -13,6 +13,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            padding-bottom: 60px; /* Ensure space for the fixed footer */
         }
         header, footer {
             background-color: #333;
@@ -23,10 +24,11 @@
         }
         table {
             width: 100%;
+            max-width: 600px;
             border-collapse: collapse;
             background-color: white;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            margin: 0 auto;
+            margin: 1em auto;
         }
         th, td {
             border: 1px solid #ddd;
@@ -68,25 +70,23 @@
         }
         .container {
             display: flex;
-            justify-content: space-between;
-            margin: auto;
+            justify-content: center;
             width: 100%;
             gap: 3em;
+            padding: 1em;
         }
         .table-container {
             width: 50%;
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             align-items: center;
             margin-bottom: 2em;
-        }
-        table {
-            margin: 0 auto;
         }
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
                 align-items: center;
+                gap: 1em;
             }
             .table-container {
                 width: 100%;
@@ -94,6 +94,18 @@
             }
             table {
                 width: 100%;
+                overflow-x: auto;
+                display: block;
+            }
+            th, td {
+                padding: 8px;
+                font-size: 14px;
+            }
+            th {
+                height: 30px;
+            }
+            td {
+                height: 25px;
             }
         }
     </style>
@@ -145,7 +157,7 @@
         <h1>Calculation</h1>
     </header>
     <div class="container">
-        <div class="table-container">
+        <div class="table-container: Center">
             <h2 style="text-align: center;">Find Discount Price</h2>
             <table>
                 <tr>
@@ -162,7 +174,7 @@
                 </tr>
             </table>
         </div>
-        <div class="table-container">
+        <div class="table-container: Center">
             <h2 style="text-align: center;">Find Discount %</h2>
             <table>
                 <tr>
