@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        header, footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 1em 0;
+            width: 100%;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+            width: 95px;
+            white-space: nowrap;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+            height: 25px;
+            text-align: center;
+        }
+        td {
+            height: 20px;
+        }
+        .losing-profit {
+            color: red;
+        }
+        .profit {
+            color: #0FC2C0;
+        }
+        .loss {
+            color: red;
+        }
+        .neutral {
+            color: #042940;
+            font-weight: bold;
+        }
+        footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 1em 0;
+            position: fixed;
+            width: 100%;
+            bottom: 0;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+            margin: auto;
+            width: 100%;
+            gap: 3em;
+        }
+        .table-container {
+            width: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 2em;
+        }
+        table {
+            margin: 0 auto;
+        }
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                align-items: center;
+            }
+            .table-container {
+                width: 100%;
+                margin-bottom: 2em;
+            }
+            table {
+                width: 100%;
+            }
+        }
+    </style>
+    <script>
+        function calculateDiscount() {
+            const originalPrice = parseFloat(document.getElementById('originalPrice').value);
+            const discountPercent = parseFloat(document.getElementById('discountPercent').value);
+            if (isNaN(originalPrice) || isNaN(discountPercent)) {
+                return;
+            }
+            const discountAmount = originalPrice * (discountPercent / 100);
+            const resultAfterDiscount = originalPrice - discountAmount;
+            const losingProfit = originalPrice - resultAfterDiscount;
+
+            document.getElementById('resultAfterDiscount').innerText = `$${resultAfterDiscount.toFixed(2)}`;
+            const losingProfitElement = document.getElementById('losingProfit');
+            if (losingProfit === 0) {
+                losingProfitElement.innerText = `$${losingProfit.toFixed(2)}`;
+                losingProfitElement.className = 'neutral';
+            } else {
+                losingProfitElement.innerText = `${losingProfit < originalPrice ? '-' : '+'}$${Math.abs(losingProfit).toFixed(2)}`;
+                losingProfitElement.className = losingProfit < originalPrice ? 'loss' : 'profit';
+            }
+        }
+
+        function calculateDiscount2() {
+            const originalPrice = parseFloat(document.getElementById('originalPrice2').value);
+            const priceAfterDiscount = parseFloat(document.getElementById('priceAfterDiscount').value);
+            if (isNaN(originalPrice) || isNaN(priceAfterDiscount)) {
+                return;
+            }
+            const discountPercent = (1 - (priceAfterDiscount / originalPrice)) * 100;
+            const losingProfit = originalPrice - priceAfterDiscount;
+
+            document.getElementById('resultOfDiscount').innerText = `${discountPercent.toFixed(2)}%`;
+            const losingProfitElement = document.getElementById('losingProfit2');
+            if (losingProfit === 0) {
+                losingProfitElement.innerText = `$${losingProfit.toFixed(2)}`;
+                losingProfitElement.className = 'neutral';
+            } else {
+                losingProfitElement.innerText = `${losingProfit < originalPrice ? '-' : '+'}$${Math.abs(losingProfit).toFixed(2)}`;
+                losingProfitElement.className = losingProfit < originalPrice ? 'loss' : 'profit';
+            }
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <h1>Calculation</h1>
+    </header>
+    <div class="container">
+        <div class="table-container">
+            <h2 style="text-align: center;">Find Discount Price</h2>
+            <table>
+                <tr>
+                    <th>Original Price</th>
+                    <th>Discount (%)</th>
+                    <th>Result After Disc.</th>
+                    <th>Losing Profit</th>
+                </tr>
+                <tr>
+                    <td><input type="number" id="originalPrice" oninput="calculateDiscount()" placeholder="$"></td>
+                    <td><input type="number" id="discountPercent" oninput="calculateDiscount()" placeholder="%"></td>
+                    <td id="resultAfterDiscount">$0.00</td>
+                    <td id="losingProfit" class="profit">$0.00</td>
+                </tr>
+            </table>
+        </div>
+        <div class="table-container">
+            <h2 style="text-align: center;">Find Discount %</h2>
+            <table>
+                <tr>
+                    <th>Original Price</th>
+                    <th>Price After Discount</th>
+                    <th>Result of Discount (%)</th>
+                    <th>Losing Profit</th>
+                </tr>
+                <tr>
+                    <td><input type="number" id="originalPrice2" oninput="calculateDiscount2()" placeholder="$"></td>
+                    <td><input type="number" id="priceAfterDiscount" oninput="calculateDiscount2()" placeholder="$"></td>
+                    <td id="resultOfDiscount">$0.00</td>
+                    <td id="losingProfit2" class="profit">$0.00</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <footer>
+        <p>&copy; 2023 Discount Price Calculator. All rights reserved.</p>
+    </footer>
+</body>
+</html>
