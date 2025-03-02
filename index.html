@@ -25,13 +25,13 @@
             display: flex;
             gap: 20px;
             flex-direction: column;
-            align-items: left;
         }
         h1 {
             color: #333;
             font-size: 24px;
             margin-bottom: 20px;
             text-align: center;
+            width: 100%;
         }
         table {
             width: 100%;
@@ -72,7 +72,7 @@
         .table-container {
             display: flex;
             flex-direction: column;
-            align-items: left;
+            align-items: flex-start;
             margin-bottom: 1em;
         }
         h2 {
@@ -105,6 +105,7 @@
                 display: flex;
                 flex-direction: column;
                 margin-bottom: 1em;
+                width: 100%;
             }
             .form-group label {
                 margin-bottom: 0.5em;
@@ -117,6 +118,8 @@
                 border: 1px solid #ddd;
                 border-radius: 4px;
                 margin-bottom: 1em;
+                width: 100%;
+                box-sizing: border-box;
             }
             .result {
                 margin-top: 1em;
@@ -145,6 +148,7 @@
                 display: flex;
                 flex-direction: column;
                 margin-bottom: 1em;
+                width: 100%;
             }
             .form-group label {
                 margin-bottom: 0.5em;
@@ -157,6 +161,8 @@
                 border: 1px solid #ddd;
                 border-radius: 4px;
                 margin-bottom: 1em;
+                width: 100%;
+                box-sizing: border-box;
             }
             .result {
                 margin-top: 1em;
@@ -223,12 +229,41 @@
             }
         }
 
-        // Ensure mobile view inputs trigger the same calculations
+        function formatDate(date) {
+            const day = date.getDate().toString().padStart(2, '0');
+            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            const month = monthNames[date.getMonth()];
+            const year = date.getFullYear();
+            return `${day}-${month}-${year}`;
+        }
+
+        function calculateEndDate() {
+            const startChargeDate = document.getElementById('startChargeDate').value || document.getElementById('mobileStartChargeDate').value;
+            const monthRenew = parseInt(document.getElementById('monthRenew').value || document.getElementById('mobileMonthRenew').value);
+            const freeMonth = parseInt(document.getElementById('freeMonth').value || document.getElementById('mobileFreeMonth').value);
+
+            if (!startChargeDate || isNaN(monthRenew) || isNaN(freeMonth)) {
+                return;
+            }
+
+            const startDate = new Date(startChargeDate);
+            const totalMonths = monthRenew + freeMonth;
+            startDate.setMonth(startDate.getMonth() + totalMonths);
+            startDate.setDate(startDate.getDate() - 1);
+
+            const endDate = formatDate(startDate);
+            document.getElementById('endDate').value = endDate;
+            document.getElementById('mobileEndDate').value = endDate;
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const mobileOriginalPrice = document.getElementById('mobileOriginalPrice');
             const mobileDiscountPercent = document.getElementById('mobileDiscountPercent');
             const mobileOriginalPrice2 = document.getElementById('mobileOriginalPrice2');
             const mobilePriceAfterDiscount = document.getElementById('mobilePriceAfterDiscount');
+            const startChargeDate = document.getElementById('startChargeDate');
+            const monthRenew = document.getElementById('monthRenew');
+            const freeMonth = document.getElementById('freeMonth');
 
             if (mobileOriginalPrice && mobileDiscountPercent) {
                 mobileOriginalPrice.addEventListener('input', function() {
@@ -250,6 +285,12 @@
                     document.getElementById('priceAfterDiscount').value = mobilePriceAfterDiscount.value;
                     calculateDiscount2();
                 });
+            }
+
+            if (startChargeDate && monthRenew && freeMonth) {
+                startChargeDate.addEventListener('input', calculateEndDate);
+                monthRenew.addEventListener('input', calculateEndDate);
+                freeMonth.addEventListener('input', calculateEndDate);
             }
         });
     </script>
@@ -311,6 +352,33 @@
                     <p>Result of Discount: <br>លទ្ធផលបន្ទាប់ពីការបញ្ចុះភាគរយ:<span id="mobileResultOfDiscount">$0.00</span></p>
                     <p>Losing Profit: <span id="mobileLosingProfit2" class="profit">$0.00</span></p>
                 </div>
+            </div>
+        </div>
+        <div class="table-container">
+            <h2>Start Charge Date</h2>
+            <table>
+                <tr>
+                    <th>Start Charge Date<br>ថ្ងៃចាប់ផ្តើមគិតថ្លៃ</th>
+                    <th>End Date/Expiry Date<br>ថ្ងៃផុតកំណត់</th>
+                    <th>Month Renew<br>ខែបន្ត</th>
+                    <th>Free Month<br>ខែមិនគិតថ្លៃ</th>
+                </tr>
+                <tr>
+                    <td data-label="Start Charge Date"><input type="date" id="startChargeDate" oninput="calculateEndDate()"></td>
+                    <td data-label="End Date/Expiry Date"><input type="text" id="endDate" readonly></td>
+                    <td data-label="Month Renew"><input type="number" id="monthRenew" placeholder="Months" oninput="calculateEndDate()"></td>
+                    <td data-label="Free Month"><input type="number" id="freeMonth" placeholder="Months" oninput="calculateEndDate()"></td>
+                </tr>
+            </table>
+            <div class="form-group">
+                <label for="mobileStartChargeDate">Start Charge Date <br> ថ្ងៃចាប់ផ្តើមគិតថ្លៃ</label>
+                <input type="date" id="mobileStartChargeDate" oninput="calculateEndDate()">
+                <label for="mobileEndDate">End Date/Expiry Date <br> ថ្ងៃផុតកំណត់</label>
+                <input type="text" id="mobileEndDate" readonly>
+                <label for="mobileMonthRenew">Month Renew <br> ខែបន្ត</label>
+                <input type="number" id="mobileMonthRenew" placeholder="Months" oninput="calculateEndDate()">
+                <label for="mobileFreeMonth">Free Month <br> ខែមិនគិតថ្លៃ</label>
+                <input type="number" id="mobileFreeMonth" placeholder="Months" oninput="calculateEndDate()">
             </div>
         </div>
     </div>
