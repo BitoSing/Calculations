@@ -88,6 +88,14 @@
         .form-group {
             display: none;
         }
+        input[type="number"], input[type="date"], input[type="text"] {
+            width: calc(100% - 24px);
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
         @media (max-width: 1024px) {
             .container {
                 flex-direction: column;
@@ -174,6 +182,14 @@
                 font-size: 2em;
             }
         }
+        .positive-result {
+            color: #5cb85c;
+            font-weight: bold;
+        }
+        .negative-result {
+            color: red;
+            font-weight: bold;
+        }
     </style>
     <script>
         function calculateDiscount() {
@@ -212,20 +228,26 @@
             const discountPercent = (1 - (priceAfterDiscount / originalPrice)) * 100;
             const losingProfit = originalPrice - priceAfterDiscount;
 
-            document.getElementById('resultOfDiscount').innerText = `${discountPercent.toFixed(2)}%`;
-            document.getElementById('mobileResultOfDiscount').innerText = `${discountPercent.toFixed(2)}%`;
+            const resultOfDiscountElement = document.getElementById('resultOfDiscount');
+            const mobileResultOfDiscountElement = document.getElementById('mobileResultOfDiscount');
             const losingProfitElement = document.getElementById('losingProfit2');
             const mobileLosingProfitElement = document.getElementById('mobileLosingProfit2');
-            if (losingProfit === 0) {
-                losingProfitElement.innerText = `$${losingProfit.toFixed(2)}`;
-                mobileLosingProfitElement.innerText = `$${losingProfit.toFixed(2)}`;
-                losingProfitElement.className = 'neutral';
-                mobileLosingProfitElement.className = 'neutral';
+
+            resultOfDiscountElement.innerText = `${discountPercent.toFixed(2)}%`;
+            mobileResultOfDiscountElement.innerText = `${discountPercent.toFixed(2)}%`;
+            losingProfitElement.innerText = `${discountPercent > 0 ? '↑' : '↓'}$${Math.abs(losingProfit).toFixed(2)}`;
+            mobileLosingProfitElement.innerText = `${discountPercent > 0 ? '↑' : '↓'}$${Math.abs(losingProfit).toFixed(2)}`;
+
+            if (discountPercent > 0) {
+                resultOfDiscountElement.className = 'positive-result';
+                mobileResultOfDiscountElement.className = 'positive-result';
+                losingProfitElement.className = 'positive-result';
+                mobileLosingProfitElement.className = 'positive-result';
             } else {
-                losingProfitElement.innerText = `${losingProfit < originalPrice ? '-' : '+'}$${Math.abs(losingProfit).toFixed(2)}`;
-                mobileLosingProfitElement.innerText = `${losingProfit < originalPrice ? '-' : '+'}$${Math.abs(losingProfit).toFixed(2)}`;
-                losingProfitElement.className = losingProfit < originalPrice ? 'loss' : 'profit';
-                mobileLosingProfitElement.className = losingProfit < originalPrice ? 'loss' : 'profit';
+                resultOfDiscountElement.className = 'negative-result';
+                mobileResultOfDiscountElement.className = 'negative-result';
+                losingProfitElement.className = 'negative-result';
+                mobileLosingProfitElement.className = 'negative-result';
             }
         }
 
@@ -301,19 +323,19 @@
             <h1>Calculation</h1>
         </header>
         <div class="table-container">
-            <h2>Find Discount Price</h2>
+            <h2>Find Result After Discount</h2>
             <table>
                 <tr>
                     <th>Original Price<br>ថ្លៃដើម</th>
                     <th>Discount (%)​<br>បញ្ចុះភាគរយ</th>
                     <th>Result After Discount<br>លទ្ធផលបន្ទាប់ពីការបញ្ចុះភាគរយ</th>
-                    <th>Losing Profit</th>
+                    <th>Loss/Gain Profit</th>
                 </tr>
                 <tr>
                     <td data-label="Original Price"><input type="number" id="originalPrice" oninput="calculateDiscount()" placeholder="$"></td>
                     <td data-label="Discount (%)"><input type="number" id="discountPercent" oninput="calculateDiscount()" placeholder="%"></td>
                     <td data-label="Result After Disc." id="resultAfterDiscount">$0.00</td>
-                    <td data-label="Losing Profit" id="losingProfit" class="profit">$0.00</td>
+                    <td data-label="Loss/Gain Profit" id="losingProfit" class="profit">$0.00</td>
                 </tr>
             </table>
             <div class="form-group">
@@ -323,24 +345,24 @@
                 <input type="number" id="mobileDiscountPercent" placeholder="%" oninput="calculateDiscount()">
                 <div class="result">
                     <p>Result After Discount: <br>លទ្ធផលបន្ទាប់ពីការបញ្ចុះភាគរយ: <span id="mobileResultAfterDiscount">$0.00</span></p>
-                    <p>Losing Profit: <span id="mobileLosingProfit" class="profit">$0.00</span></p>
+                    <p>Loss/Gain Profit: <span id="mobileLosingProfit" class="profit">$0.00</span></p>
                 </div>
             </div>
         </div>
         <div class="table-container">
-            <h2>Find Discount %</h2>
+            <h2>Find Result Discount (%)</h2>
             <table>
                 <tr>
                     <th>Original Price<br>ថ្លៃដើម</th>
                     <th>Price after discount​<br>តម្លៃលក់ចេញ</th>
-                    <th>Result Discount<br>លទ្ធផលការបញ្ចុះភាគរយ</th>
-                    <th>Losing Profit</th>
+                    <th>Result Discount (%)<br>លទ្ធផលការបញ្ចុះភាគរយ</th>
+                    <th>Loss/Gain Profit</th>
                 </tr>
                 <tr>
                     <td data-label="Original Price"><input type="number" id="originalPrice2" oninput="calculateDiscount2()" placeholder="$"></td>
                     <td data-label="Price After Discount"><input type="number" id="priceAfterDiscount" oninput="calculateDiscount2()" placeholder="$"></td>
-                    <td data-label="Result of Discount (%)" id="resultOfDiscount">$0.00</td>
-                    <td data-label="Losing Profit" id="losingProfit2" class="profit">$0.00</td>
+                    <td data-label="Result of Discount (%)" id="resultOfDiscount">%0</td>
+                    <td data-label="Loss/Gain Profit" id="losingProfit2" class="profit">$0.00</td>
                 </tr>
             </table>
             <div class="form-group">
@@ -350,7 +372,7 @@
                 <input type="number" id="mobilePriceAfterDiscount" placeholder="$" oninput="calculateDiscount2()">
                 <div class="result">
                     <p>Result of Discount: <br>លទ្ធផលបន្ទាប់ពីការបញ្ចុះភាគរយ:<span id="mobileResultOfDiscount">$0.00</span></p>
-                    <p>Losing Profit: <span id="mobileLosingProfit2" class="profit">$0.00</span></p>
+                    <p>Loss/Gain Profit: <span id="mobileLosingProfit2" class="profit">$0.00</span></p>
                 </div>
             </div>
         </div>
