@@ -88,6 +88,46 @@
         .form-group {
             display: none;
         }
+        @media (max-width: 1024px) {
+            .container {
+                flex-direction: column;
+                margin: 10px;
+                width: 90%;
+            }
+            .table-container {
+                width: 100%;
+                margin-bottom: 2em;
+            }
+            table {
+                display: none;
+            }
+            .form-group {
+                display: flex;
+                flex-direction: column;
+                margin-bottom: 1em;
+            }
+            .form-group label {
+                margin-bottom: 0.5em;
+                font-weight: regular;
+                font-size: 15px;
+            }
+            .form-group input {
+                padding: 0.5em;
+                font-size: 1em;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                margin-bottom: 1em;
+            }
+            .result {
+                margin-top: 1em;
+                font-size: 1.2em;
+                font-weight: bold;
+                color: #333;
+            }
+            h2 {
+                font-size: 2em;
+            }
+        }
         @media (max-width: 768px) {
             .container {
                 flex-direction: column;
@@ -113,14 +153,14 @@
             }
             .form-group input {
                 padding: 0.5em;
-                font-size: 0.5em;
+                font-size: 1em;
                 border: 1px solid #ddd;
                 border-radius: 4px;
                 margin-bottom: 1em;
             }
             .result {
                 margin-top: 1em;
-                font-size: 0.2em;
+                font-size: 1.2em;
                 font-weight: bold;
                 color: #333;
             }
@@ -131,8 +171,8 @@
     </style>
     <script>
         function calculateDiscount() {
-            const originalPrice = parseFloat(document.getElementById('originalPrice').value);
-            const discountPercent = parseFloat(document.getElementById('discountPercent').value);
+            const originalPrice = parseFloat(document.getElementById('originalPrice').value || document.getElementById('mobileOriginalPrice').value);
+            const discountPercent = parseFloat(document.getElementById('discountPercent').value || document.getElementById('mobileDiscountPercent').value);
             if (isNaN(originalPrice) || isNaN(discountPercent)) {
                 return;
             }
@@ -141,19 +181,25 @@
             const losingProfit = originalPrice - resultAfterDiscount;
 
             document.getElementById('resultAfterDiscount').innerText = `$${resultAfterDiscount.toFixed(2)}`;
+            document.getElementById('mobileResultAfterDiscount').innerText = `$${resultAfterDiscount.toFixed(2)}`;
             const losingProfitElement = document.getElementById('losingProfit');
+            const mobileLosingProfitElement = document.getElementById('mobileLosingProfit');
             if (losingProfit === 0) {
                 losingProfitElement.innerText = `$${losingProfit.toFixed(2)}`;
+                mobileLosingProfitElement.innerText = `$${losingProfit.toFixed(2)}`;
                 losingProfitElement.className = 'neutral';
+                mobileLosingProfitElement.className = 'neutral';
             } else {
                 losingProfitElement.innerText = `${losingProfit < originalPrice ? '-' : '+'}$${Math.abs(losingProfit).toFixed(2)}`;
+                mobileLosingProfitElement.innerText = `${losingProfit < originalPrice ? '-' : '+'}$${Math.abs(losingProfit).toFixed(2)}`;
                 losingProfitElement.className = losingProfit < originalPrice ? 'loss' : 'profit';
+                mobileLosingProfitElement.className = losingProfit < originalPrice ? 'loss' : 'profit';
             }
         }
 
         function calculateDiscount2() {
-            const originalPrice = parseFloat(document.getElementById('originalPrice2').value);
-            const priceAfterDiscount = parseFloat(document.getElementById('priceAfterDiscount').value);
+            const originalPrice = parseFloat(document.getElementById('originalPrice2').value || document.getElementById('mobileOriginalPrice2').value);
+            const priceAfterDiscount = parseFloat(document.getElementById('priceAfterDiscount').value || document.getElementById('mobilePriceAfterDiscount').value);
             if (isNaN(originalPrice) || isNaN(priceAfterDiscount)) {
                 return;
             }
@@ -161,13 +207,19 @@
             const losingProfit = originalPrice - priceAfterDiscount;
 
             document.getElementById('resultOfDiscount').innerText = `${discountPercent.toFixed(2)}%`;
+            document.getElementById('mobileResultOfDiscount').innerText = `${discountPercent.toFixed(2)}%`;
             const losingProfitElement = document.getElementById('losingProfit2');
+            const mobileLosingProfitElement = document.getElementById('mobileLosingProfit2');
             if (losingProfit === 0) {
                 losingProfitElement.innerText = `$${losingProfit.toFixed(2)}`;
+                mobileLosingProfitElement.innerText = `$${losingProfit.toFixed(2)}`;
                 losingProfitElement.className = 'neutral';
+                mobileLosingProfitElement.className = 'neutral';
             } else {
                 losingProfitElement.innerText = `${losingProfit < originalPrice ? '-' : '+'}$${Math.abs(losingProfit).toFixed(2)}`;
+                mobileLosingProfitElement.innerText = `${losingProfit < originalPrice ? '-' : '+'}$${Math.abs(losingProfit).toFixed(2)}`;
                 losingProfitElement.className = losingProfit < originalPrice ? 'loss' : 'profit';
+                mobileLosingProfitElement.className = losingProfit < originalPrice ? 'loss' : 'profit';
             }
         }
 
