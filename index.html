@@ -28,28 +28,27 @@
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             margin: 0;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            padding: 20px;
             min-height: 100vh;
             color: var(--text-color);
+            display: flex;
+            justify-content: center;
         }
 
         .container {
             width: 95%;
-            max-width: 1000px;
-            margin: 20px;
-            padding: 20px;
+            max-width: 1200px;
             background-color: var(--card-bg);
             box-shadow: var(--shadow);
             border-radius: 12px;
-            display: flex;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 20px;
-            flex-direction: column;
         }
 
         header {
+            grid-column: 1 / -1; /* Span across all columns */
             margin-bottom: 20px;
         }
 
@@ -57,7 +56,6 @@
             color: var(--secondary-color);
             font-size: 28px;
             text-align: center;
-            width: 100%;
         }
 
         h2 {
@@ -69,7 +67,6 @@
         }
 
         .calculation-section {
-            margin-bottom: 30px;
             background-color: var(--card-bg);
             border-radius: 8px;
             padding: 20px;
@@ -158,9 +155,8 @@
 
         @media (max-width: 768px) {
             .container {
-                width: 95%;
+                grid-template-columns: 1fr; /* Stack sections on small screens */
                 padding: 15px;
-                margin: 10px;
             }
 
             h1 {
@@ -255,14 +251,10 @@
                 return;
             }
 
-            // Create a new date object from the start date
             const startDate = new Date(startChargeDate);
             const totalMonths = monthRenew + freeMonth;
             
-            // Add the total months
             startDate.setMonth(startDate.getMonth() + totalMonths);
-            
-            // Subtract 1 day to get the end date
             startDate.setDate(startDate.getDate() - 1);
 
             const endDate = formatDate(startDate);
@@ -270,7 +262,6 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize any values that might be needed
             const inputFields = document.querySelectorAll('input');
             inputFields.forEach(field => {
                 field.addEventListener('input', function() {
@@ -296,12 +287,12 @@
             <h2>Find Result After Discount</h2>
             <div class="input-group">
                 <div class="input-field">
-                    <label for="originalPrice">Original Price br<span class="language-label">ថ្លៃដើម</span></label>
-                    <input type="number" id="originalPrice" oninput="calculateDiscount()" placeholder="$">
+                    <label for="originalPrice">Original Price <span class="language-label">ថ្លៃដើម</span></label>
+                    <input type="number" id="originalPrice" placeholder="$">
                 </div>
                 <div class="input-field">
                     <label for="discountPercent">Discount (%) <span class="language-label">បញ្ចុះភាគរយ</span></label>
-                    <input type="number" id="discountPercent" oninput="calculateDiscount()" placeholder="%">
+                    <input type="number" id="discountPercent" placeholder="%">
                 </div>
             </div>
             <div class="result-display">
@@ -321,11 +312,11 @@
             <div class="input-group">
                 <div class="input-field">
                     <label for="originalPrice2">Original Price <span class="language-label">ថ្លៃដើម</span></label>
-                    <input type="number" id="originalPrice2" oninput="calculateDiscount2()" placeholder="$">
+                    <input type="number" id="originalPrice2" placeholder="$">
                 </div>
                 <div class="input-field">
                     <label for="priceAfterDiscount">Price After Discount <span class="language-label">តម្លៃលក់ចេញ</span></label>
-                    <input type="number" id="priceAfterDiscount" oninput="calculateDiscount2()" placeholder="$">
+                    <input type="number" id="priceAfterDiscount" placeholder="$">
                 </div>
             </div>
             <div class="result-display">
@@ -344,20 +335,20 @@
             <h2>Start Charge Date</h2>
             <div class="input-group">
                 <div class="input-field">
-                    <label for="startChargeDate">Start Charge Date<span class="language-label">ថ្ងៃចាប់ផ្តើមគិតថ្លៃ</span></label>
-                    <input type="date" id="startChargeDate" oninput="calculateEndDate()">
+                    <label for="startChargeDate">Start Charge Date <span class="language-label">ថ្ងៃចាប់ផ្តើមគិតថ្លៃ</span></label>
+                    <input type="date" id="startChargeDate">
                 </div>
                 <div class="input-field">
                     <label for="monthRenew">Month Renew <span class="language-label">ខែបន្ត</span></label>
-                    <input type="number" id="monthRenew" placeholder="Months" oninput="calculateEndDate()">
+                    <input type="number" id="monthRenew" placeholder="Months">
                 </div>
                 <div class="input-field">
                     <label for="freeMonth">Free Month <span class="language-label">ខែមិនគិតថ្លៃ</span></label>
-                    <input type="number" id="freeMonth" placeholder="Months" oninput="calculateEndDate()">
+                    <input type="number" id="freeMonth" placeholder="Months">
                 </div>
             </div>
             <div class="result-display">
-                <div class "result-row">
+                <div class="result-row">
                     <span class="result-label">End Date/Expiry Date <span class="language-label">ថ្ងៃផុតកំណត់</span>:</span>
                     <input type="text" id="endDate" readonly style="border: none; background: transparent; font-weight: 600; font-size: 18px; color: var(--secondary-color); text-align: right; width: auto;">
                 </div>
