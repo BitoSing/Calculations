@@ -352,7 +352,7 @@
                 <h2>
                     <span class="icon-container">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a Risky.5.5 0 11-1 0 .5.5 0 011 0z" />
                         </svg>
                     </span>
                     Discount Percentage Finder
@@ -482,6 +482,43 @@
                     <div class="result-item">
                         <span class="result-label">Pro-Rated Days <span class="language-label">ថ្ងៃបន្ថែម</span>:</span>
                         <span class="result-value neutral" id="proRateDays">0 Days</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Extra Charge for Pro Rate (Change Billing Date Fee) Calculator -->
+            <div class="calculator-card">
+                <h2>
+                    <span class="icon-container">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                    </span>
+                    Change Billing Date Fee
+                </h2>
+                <div class="input-group">
+                    <div class="input-field">
+                        <label for="extraMonthlyFee">Monthly Fee <span class="language-label">ថ្លៃប្រចាំខែ</span></label>
+                        <input type="text" id="extraMonthlyFee" placeholder="Enter monthly fee ($)" pattern="[0-9,.]+" data-step="0.01">
+                    </div>
+                    <div class="input-field">
+                        <label for="extraDaysOfMonth">Days in Month <span class="language-label">ថ្ងៃក្នុងខែ</span></label>
+                        <select id="extraDaysOfMonth">
+                            <option value="28">28 Days</option>
+                            <option value="29">29 Days</option>
+                            <option value="30">30 Days</option>
+                            <option value="31">31 Days</option>
+                        </select>
+                    </div>
+                    <div class="input-field">
+                        <label for="daysToCharge">Days to Charge <span class="language-label">ថ្ងៃត្រូវគិតថ្លៃ</span></label>
+                        <input type="text" id="daysToCharge" placeholder="Enter days to charge" pattern="[0-9,.]+" data-step="1">
+                    </div>
+                </div>
+                <div class="results">
+                    <div class="result-item">
+                        <span class="result-label">Extra Charge <span class="language-label">ថ្លៃបន្ថែម</span>:</span>
+                        <span class="result-value neutral" id="extraCharge">$0.00</span>
                     </div>
                 </div>
             </div>
@@ -702,6 +739,46 @@
             proRateDaysResult.className = 'result-value positive';
         }
 
+        function calculateExtraCharge() {
+            const monthlyFeeInput = document.getElementById('extraMonthlyFee');
+            const daysOfMonthInput = document.getElementById('extraDaysOfMonth');
+            const daysToChargeInput = document.getElementById('daysToCharge');
+            const extraChargeResult = document.getElementById('extraCharge');
+
+            const monthlyFee = parseFloat(stripSeparators(monthlyFeeInput.value));
+            const daysOfMonth = parseInt(daysOfMonthInput.value);
+            const daysToCharge = parseFloat(stripSeparators(daysToChargeInput.value));
+
+            // Reset error states
+            monthlyFeeInput.classList.remove('input-error');
+            daysToChargeInput.classList.remove('input-error');
+
+            // Validate inputs
+            if (isNaN(monthlyFee) || isNaN(daysToCharge) || monthlyFee <= 0 || daysToCharge < 0) {
+                monthlyFeeInput.classList.add('input-error', isNaN(monthlyFee) || monthlyFee <= 0);
+                daysToChargeInput.classList.add('input-error', isNaN(daysToCharge) || daysToCharge < 0);
+                extraChargeResult.innerText = '$0.00';
+                extraChargeResult.className = 'result-value neutral';
+                return;
+            }
+
+            // Check for extremely large inputs
+            if (monthlyFee > 1e12 || daysToCharge > daysOfMonth) {
+                monthlyFeeInput.classList.add('input-error', monthlyFee > 1e12);
+                daysToChargeInput.classList.add('input-error', daysToCharge > daysOfMonth);
+                extraChargeResult.innerText = '$0.00';
+                extraChargeResult.className = 'result-value neutral';
+                return;
+            }
+
+            // Calculate extra charge: (monthly fee / days of month) * days to charge
+            const extraCharge = (monthlyFee / daysOfMonth) * daysToCharge;
+
+            // Update result
+            extraChargeResult.innerText = `$${formatNumber(extraCharge)}`;
+            extraChargeResult.className = 'result-value positive';
+        }
+
         // Theme toggle functionality
         document.getElementById('themeToggle').addEventListener('click', function() {
             document.body.classList.toggle('dark-mode');
@@ -742,6 +819,8 @@
                         calculateInterest();
                     } else if (field.id.includes('monthlyFee') || field.id.includes('remainingFee') || field.id.includes('daysOfMonth')) {
                         calculateProRateDays();
+                    } else if (field.id.includes('extraMonthlyFee') || field.id.includes('extraDaysOfMonth') || field.id.includes('daysToCharge')) {
+                        calculateExtraCharge();
                     }
                 });
             });
@@ -749,6 +828,7 @@
             // Initial calculations
             calculateEndDate();
             calculateProRateDays();
+            calculateExtraCharge();
         });
     </script>
 </body>
