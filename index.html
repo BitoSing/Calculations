@@ -556,9 +556,9 @@
 
             // Validate inputs
             if (isNaN(principal) || isNaN(months) || isNaN(rate) || principal <= 0 || months <= 0 || rate <= 0) {
-                principalInput.classList.toggle('input-error', isNaN(principal) || principal <= 0);
-                monthsInput.classList.toggle('input-error', isNaN(months) || months <= 0);
-                rateInput.classList.toggle('input-error', isNaN(rate) || rate <= 0);
+                principalInput.classList.add('input-error', isNaN(principal) || principal <= 0);
+                monthsInput.classList.add('input-error', isNaN(months) || months <= 0);
+                rateInput.classList.add('input-error', isNaN(rate) || rate <= 0);
                 interestResult.innerText = '$0.00';
                 totalResult.innerText = '$0.00';
                 interestResult.className = 'result-value neutral';
@@ -568,9 +568,9 @@
 
             // Check for extremely large inputs
             if (principal > 1e12 || months > 1e3 || rate > 1e3) {
-                principalInput.classList.toggle('input-error', principal > 1e12);
-                monthsInput.classList.toggle('input-error', months > 1e3);
-                rateInput.classList.toggle('input-error', rate > 1e3);
+                principalInput.classList.add('input-error', principal > 1e12);
+                monthsInput.classList.add('input-error', months > 1e3);
+                rateInput.classList.add('input-error', rate > 1e3);
                 interestResult.innerText = '$0.00';
                 totalResult.innerText = '$0.00';
                 interestResult.className = 'result-value neutral';
@@ -623,9 +623,8 @@
                 });
             });
             
-            // Initial calculations
+            // Initial calculations (avoid triggering on load for interest calculator)
             calculateEndDate();
-            calculateInterest();
         });
     </script>
 </body>
