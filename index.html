@@ -123,7 +123,7 @@
             font-weight: 400;
         }
 
-        input {
+        input, select {
             width: 100%;
             padding: 12px 15px;
             font-size: 0.95rem;
@@ -135,7 +135,7 @@
             font-family: 'Inter', sans-serif;
         }
 
-        input:focus {
+        input:focus, select:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px var(--primary-light);
@@ -277,7 +277,7 @@
             border-color: #4a5568;
         }
 
-        body.dark-mode input {
+        body.dark-mode input, body.dark-mode select {
             background-color: #4a5568;
             border-color: #4a5568;
             color: #e2e8f0;
@@ -445,6 +445,43 @@
                     <div class="result-item">
                         <span class="result-label">Total Amount <span class="language-label">សរុប</span>:</span>
                         <span class="result-value neutral" id="totalResult">$0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pro Rate Day with Remaining Credit Calculator -->
+            <div class="calculator-card">
+                <h2>
+                    <span class="icon-container">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l4 4m-4-12V4m0 16v-4m-4-4H4m12 0h4m-8 8v4m0-16V4m-4 4H4m12 0h4" />
+                        </svg>
+                    </span>
+                    Pro Rate Day Calculator
+                </h2>
+                <div class="input-group">
+                    <div class="input-field">
+                        <label for="monthlyFee">Monthly Fee <span class="language-label">ថ្លៃប្រចាំខែ</span></label>
+                        <input type="text" id="monthlyFee" placeholder="Enter monthly fee ($)" pattern="[0-9,.]+" data-step="0.01">
+                    </div>
+                    <div class="input-field">
+                        <label for="remainingFee">Remaining Fee <span class="language-label">ថ្លៃនៅសល់</span></label>
+                        <input type="text" id="remainingFee" placeholder="Enter remaining fee ($)" pattern="[0-9,.]+" data-step="0.01">
+                    </div>
+                    <div class="input-field">
+                        <label for="daysOfMonth">Days in Month <span class="language-label">ថ្ងៃក្នុងខែ</span></label>
+                        <select id="daysOfMonth">
+                            <option value="28">28 Days</option>
+                            <option value="29">29 Days</option>
+                            <option value="30">30 Days</option>
+                            <option value="31">31 Days</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="results">
+                    <div class="result-item">
+                        <span class="result-label">Pro-Rated Days <span class="language-label">ថ្ងៃបន្ថែម</span>:</span>
+                        <span class="result-value neutral" id="proRateDays">0 Days</span>
                     </div>
                 </div>
             </div>
@@ -625,6 +662,46 @@
             totalResult.className = 'result-value neutral';
         }
 
+        function calculateProRateDays() {
+            const monthlyFeeInput = document.getElementById('monthlyFee');
+            const remainingFeeInput = document.getElementById('remainingFee');
+            const daysOfMonthInput = document.getElementById('daysOfMonth');
+            const proRateDaysResult = document.getElementById('proRateDays');
+
+            const monthlyFee = parseFloat(stripSeparators(monthlyFeeInput.value));
+            const remainingFee = parseFloat(stripSeparators(remainingFeeInput.value));
+            const daysOfMonth = parseInt(daysOfMonthInput.value);
+
+            // Reset error states
+            monthlyFeeInput.classList.remove('input-error');
+            remainingFeeInput.classList.remove('input-error');
+
+            // Validate inputs
+            if (isNaN(monthlyFee) || isNaN(remainingFee) || monthlyFee <= 0 || remainingFee < 0) {
+                monthlyFeeInput.classList.add('input-error', isNaN(monthlyFee) || monthlyFee <= 0);
+                remainingFeeInput.classList.add('input-error', isNaN(remainingFee) || remainingFee < 0);
+                proRateDaysResult.innerText = '0 Days';
+                proRateDaysResult.className = 'result-value neutral';
+                return;
+            }
+
+            // Check for extremely large inputs
+            if (monthlyFee > 1e12 || remainingFee > 1e12) {
+                monthlyFeeInput.classList.add('input-error', monthlyFee > 1e12);
+                remainingFeeInput.classList.add('input-error', remainingFee > 1e12);
+                proRateDaysResult.innerText = '0 Days';
+                proRateDaysResult.className = 'result-value neutral';
+                return;
+            }
+
+            // Calculate pro-rated days: (remaining fee * days of month) / monthly fee
+            const proRateDays = (remainingFee * daysOfMonth) / monthlyFee;
+
+            // Update result
+            proRateDaysResult.innerText = `${Math.round(proRateDays)} Days`;
+            proRateDaysResult.className = 'result-value positive';
+        }
+
         // Theme toggle functionality
         document.getElementById('themeToggle').addEventListener('click', function() {
             document.body.classList.toggle('dark-mode');
@@ -644,7 +721,7 @@
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('startChargeDate').value = today;
             
-            const inputFields = document.querySelectorAll('input');
+            const inputFields = document.querySelectorAll('input, select');
             inputFields.forEach(field => {
                 // Format number inputs with thousand separators
                 if (field.type === 'text' && field.pattern === '[0-9,.]+') {
@@ -663,12 +740,15 @@
                         calculateEndDate();
                     } else if (field.id.includes('principal') || field.id.includes('months') || field.id.includes('rate')) {
                         calculateInterest();
+                    } else if (field.id.includes('monthlyFee') || field.id.includes('remainingFee') || field.id.includes('daysOfMonth')) {
+                        calculateProRateDays();
                     }
                 });
             });
             
             // Initial calculations
             calculateEndDate();
+            calculateProRateDays();
         });
     </script>
 </body>
