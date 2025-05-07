@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Business Calculator</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Khmer+OS+Siemreap&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #4a6fa5; /* Softer blue */
@@ -116,6 +116,7 @@
         }
 
         .language-label {
+            font-family: 'Khmer OS Siemreap', sans-serif;
             font-size: 0.75rem;
             color: var(--gray);
             margin-left: 5px;
@@ -131,6 +132,7 @@
             transition: var(--transition);
             background-color: var(--light);
             color: var(--dark);
+            font-family: 'Inter', sans-serif;
         }
 
         input:focus {
@@ -324,11 +326,11 @@
                 <div class="input-group">
                     <div class="input-field">
                         <label for="originalPrice">Original Price <span class="language-label">ថ្លៃដើម</span></label>
-                        <input type="number" id="originalPrice" placeholder="Enter amount ($)">
+                        <input type="text" id="originalPrice" placeholder="Enter amount ($)" pattern="[0-9,.]+">
                     </div>
                     <div class="input-field">
                         <label for="discountPercent">Discount Percentage <span class="language-label">បញ្ចុះភាគរយ</span></label>
-                        <input type="number" id="discountPercent" placeholder="Enter percentage (%)">
+                        <input type="text" id="discountPercent" placeholder="Enter percentage (%)" pattern="[0-9,.]+">
                     </div>
                 </div>
                 <div class="results">
@@ -358,11 +360,11 @@
                 <div class="input-group">
                     <div class="input-field">
                         <label for="originalPrice2">Original Price <span class="language-label">ថ្លៃដើម</span></label>
-                        <input type="number" id="originalPrice2" placeholder="Enter amount ($)">
+                        <input type="text" id="originalPrice2" placeholder="Enter amount ($)" pattern="[0-9,.]+">
                     </div>
                     <div class="input-field">
                         <label for="priceAfterDiscount">Sale Price <span class="language-label">តម្លៃលក់ចេញ</span></label>
-                        <input type="number" id="priceAfterDiscount" placeholder="Enter sale price ($)">
+                        <input type="text" id="priceAfterDiscount" placeholder="Enter sale price ($)" pattern="[0-9,.]+">
                     </div>
                 </div>
                 <div class="results">
@@ -396,11 +398,11 @@
                     </div>
                     <div class="input-field">
                         <label for="monthRenew">Billing Months <span class="language-label">ខែបន្ត</span></label>
-                        <input type="number" id="monthRenew" placeholder="Enter months">
+                        <input type="text" id="monthRenew" placeholder="Enter months" pattern="[0-9,.]+">
                     </div>
                     <div class="input-field">
                         <label for="freeMonth">Free Months <span class="language-label">ខែមិនគិតថ្លៃ</span></label>
-                        <input type="number" id="freeMonth" placeholder="Enter free months">
+                        <input type="text" id="freeMonth" placeholder="Enter free months" pattern="[0-9,.]+">
                     </div>
                 </div>
                 <div class="results">
@@ -424,15 +426,15 @@
                 <div class="input-group">
                     <div class="input-field">
                         <label for="principal">Deposit Amount <span class="language-label">ចំនួនប្រាក់បញ្ញើ</span></label>
-                        <input type="number" id="principal" placeholder="Enter amount ($)" step="0.01">
+                        <input type="text" id="principal" placeholder="Enter amount ($)" pattern="[0-9,.]+" data-step="0.01">
                     </div>
                     <div class="input-field">
                         <label for="months">Deposit Duration <span class="language-label">រយៈពេលបញ្ញើ (ខែ)</span></label>
-                        <input type="number" id="months" placeholder="Enter months" step="1">
+                        <input type="text" id="months" placeholder="Enter months" pattern="[0-9,.]+" data-step="1">
                     </div>
                     <div class="input-field">
                         <label for="rate">Interest Rate <span class="language-label">អត្រាការប្រាក់ (%)</span></label>
-                        <input type="number" id="rate" placeholder="Enter rate (%)" step="0.01">
+                        <input type="text" id="rate" placeholder="Enter rate (%)" pattern="[0-9,.]+" data-step="0.01">
                     </div>
                 </div>
                 <div class="results">
@@ -450,9 +452,43 @@
     </div>
 
     <script>
+        // Format number for output (thousand separators)
+        function formatNumber(num) {
+            return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        // Remove thousand separators for calculations
+        function stripSeparators(value) {
+            return value.replace(/,/g, '');
+        }
+
+        // Format input value with thousand separators
+        function formatInputNumber(input) {
+            let value = input.value.replace(/[^0-9.]/g, ''); // Allow only numbers and dots
+            const step = input.getAttribute('data-step');
+            const isInteger = step === '1';
+
+            // Split into integer and decimal parts
+            let [integerPart, decimalPart] = value.split('.');
+
+            // Format integer part with thousand separators
+            integerPart = parseInt(integerPart || '0').toLocaleString('en-US');
+
+            // Handle decimal part based on step
+            if (isInteger) {
+                input.value = integerPart;
+            } else if (decimalPart !== undefined) {
+                // Limit decimal to 2 places for fields with step="0.01"
+                decimalPart = decimalPart.slice(0, 2);
+                input.value = `${integerPart}.${decimalPart}`;
+            } else {
+                input.value = integerPart;
+            }
+        }
+
         function calculateDiscount() {
-            const originalPrice = parseFloat(document.getElementById('originalPrice').value);
-            const discountPercent = parseFloat(document.getElementById('discountPercent').value);
+            const originalPrice = parseFloat(stripSeparators(document.getElementById('originalPrice').value));
+            const discountPercent = parseFloat(stripSeparators(document.getElementById('discountPercent').value));
             
             if (isNaN(originalPrice) || isNaN(discountPercent)) {
                 document.getElementById('resultAfterDiscount').innerText = '$0.00';
@@ -465,21 +501,21 @@
             const resultAfterDiscount = originalPrice - discountAmount;
             const losingProfit = originalPrice - resultAfterDiscount;
 
-            document.getElementById('resultAfterDiscount').innerText = `$${resultAfterDiscount.toFixed(2)}`;
+            document.getElementById('resultAfterDiscount').innerText = `$${formatNumber(resultAfterDiscount)}`;
             
             const losingProfitElement = document.getElementById('losingProfit');
             if (losingProfit === 0) {
                 losingProfitElement.innerText = `$0.00`;
                 losingProfitElement.className = 'result-value neutral';
             } else {
-                losingProfitElement.innerText = `${losingProfit > 0 ? '+' : '-'}$${Math.abs(losingProfit).toFixed(2)}`;
+                losingProfitElement.innerText = `${losingProfit > 0 ? '+' : '-'}$${formatNumber(Math.abs(losingProfit))}`;
                 losingProfitElement.className = losingProfit < 0 ? 'result-value positive' : 'result-value negative';
             }
         }
 
         function calculateDiscount2() {
-            const originalPrice = parseFloat(document.getElementById('originalPrice2').value);
-            const priceAfterDiscount = parseFloat(document.getElementById('priceAfterDiscount').value);
+            const originalPrice = parseFloat(stripSeparators(document.getElementById('originalPrice2').value));
+            const priceAfterDiscount = parseFloat(stripSeparators(document.getElementById('priceAfterDiscount').value));
             
             if (isNaN(originalPrice) || isNaN(priceAfterDiscount)) {
                 document.getElementById('resultOfDiscount').innerText = '0.00%';
@@ -495,8 +531,8 @@
             const resultOfDiscountElement = document.getElementById('resultOfDiscount');
             const losingProfitElement = document.getElementById('losingProfit2');
 
-            resultOfDiscountElement.innerText = `${Math.abs(discountPercent).toFixed(2)}%`;
-            losingProfitElement.innerText = `${losingProfit > 0 ? '-' : '+'}$${Math.abs(losingProfit).toFixed(2)}`;
+            resultOfDiscountElement.innerText = `${formatNumber(Math.abs(discountPercent))}%`;
+            losingProfitElement.innerText = `${losingProfit > 0 ? '-' : '+'}$${formatNumber(Math.abs(losingProfit))}`;
 
             if (discountPercent > 0) {
                 resultOfDiscountElement.className = 'result-value positive';
@@ -520,8 +556,8 @@
 
         function calculateEndDate() {
             const startChargeDate = document.getElementById('startChargeDate').value;
-            const monthRenew = parseInt(document.getElementById('monthRenew').value);
-            const freeMonth = document.getElementById('freeMonth').value ? parseInt(document.getElementById('freeMonth').value) : 0;
+            const monthRenew = parseInt(stripSeparators(document.getElementById('monthRenew').value));
+            const freeMonth = document.getElementById('freeMonth').value ? parseInt(stripSeparators(document.getElementById('freeMonth').value)) : 0;
 
             if (!startChargeDate || isNaN(monthRenew)) {
                 document.getElementById('endDate').value = 'DD-Mon-YYYY';
@@ -545,9 +581,9 @@
             const interestResult = document.getElementById('interestResult');
             const totalResult = document.getElementById('totalResult');
 
-            const principal = parseFloat(principalInput.value);
-            const months = parseFloat(monthsInput.value);
-            const rate = parseFloat(rateInput.value);
+            const principal = parseFloat(stripSeparators(principalInput.value));
+            const months = parseFloat(stripSeparators(monthsInput.value));
+            const rate = parseFloat(stripSeparators(rateInput.value));
 
             // Reset error states
             principalInput.classList.remove('input-error');
@@ -582,9 +618,9 @@
             const interest = principal * (rate / 100) * timeInYears;
             const total = principal + interest;
 
-            // Update results
-            interestResult.innerText = `$${interest.toFixed(2)}`;
-            totalResult.innerText = `$${total.toFixed(2)}`;
+            // Update results with thousand separators
+            interestResult.innerText = `$${formatNumber(interest)}`;
+            totalResult.innerText = `$${formatNumber(total)}`;
             interestResult.className = 'result-value positive';
             totalResult.className = 'result-value neutral';
         }
@@ -610,6 +646,14 @@
             
             const inputFields = document.querySelectorAll('input');
             inputFields.forEach(field => {
+                // Format number inputs with thousand separators
+                if (field.type === 'text' && field.pattern === '[0-9,.]+') {
+                    field.addEventListener('input', function() {
+                        formatInputNumber(this);
+                    });
+                }
+
+                // Trigger calculations on input
                 field.addEventListener('input', function() {
                     if (field.id.includes('originalPrice') || field.id.includes('discountPercent')) {
                         calculateDiscount();
@@ -623,7 +667,7 @@
                 });
             });
             
-            // Initial calculations (avoid triggering on load for interest calculator)
+            // Initial calculations
             calculateEndDate();
         });
     </script>
