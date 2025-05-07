@@ -139,6 +139,11 @@
             box-shadow: 0 0 0 3px var(--primary-light);
         }
 
+        input.input-error {
+            border-color: var(--danger);
+            box-shadow: 0 0 0 3px rgba(198, 93, 87, 0.2);
+        }
+
         .results {
             background-color: var(--primary-light);
             border-radius: var(--border-radius);
@@ -302,7 +307,7 @@
     <div class="container">
         <header>
             <h1>Business Calculator</h1>
-            <p class="subtitle">Essential tools for pricing and subscription calculations</p>
+            <p class="subtitle">Essential tools for pricing, subscription, and interest calculations</p>
         </header>
 
         <div class="calculator-grid">
@@ -405,6 +410,43 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Interest Calculator -->
+            <div class="calculator-card">
+                <h2>
+                    <span class="icon-container">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </span>
+                    Interest Calculator
+                </h2>
+                <div class="input-group">
+                    <div class="input-field">
+                        <label for="principal">Deposit Amount <span class="language-label">ចំនួនប្រាក់បញ្ញើ</span></label>
+                        <input type="number" id="principal" placeholder="Enter amount ($)" step="0.01">
+                    </div>
+                    <div class="input-field">
+                        <label for="months">Deposit Duration <span class="language-label">រយៈពេលបញ្ញើ (ខែ)</span></label>
+                        <input type="number sixteen="1">
+                        <input type="number" id="months" placeholder="Enter months" step="1">
+                    </div>
+                    <div class="input-field">
+                        <label for="rate">Interest Rate <span class="language-label">អត្រាការប្រាក់ (%)</span></label>
+                        <input type="number" id="rate" placeholder="Enter rate (%)" step="0.01">
+                    </div>
+                </div>
+                <div class="results">
+                    <div class="result-item">
+                        <span class="result-label">Interest Earned <span class="language-label">ការប្រាក់</span>:</span>
+                        <span class="result-value neutral" id="interestResult">$0.00</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Total Amount <span class="language-label">សរុប</span>:</span>
+                        <span class="result-value neutral" id="totalResult">$0.00</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -497,6 +539,57 @@
             document.getElementById('endDate').value = endDate;
         }
 
+        function calculateInterest() {
+            const principalInput = document.getElementById('principal');
+            const monthsInput = document.getElementById('months');
+            const rateInput = document.getElementById('rate');
+            const interestResult = document.getElementById('interestResult');
+            const totalResult = document.getElementById('totalResult');
+
+            const principal = parseFloat(principalInput.value);
+            const months = parseFloat(monthsInput.value);
+            const rate = parseFloat(rateInput.value);
+
+            // Reset error states
+            principalInput.classList.remove('input-error');
+            monthsInput.classList.remove('input-error');
+            rateInput.classList.remove('input-error');
+
+            // Validate inputs
+            if (isNaN(principal) || isNaN(months) || isNaN(rate) || principal <= 0 || months <= 0 || rate <= 0) {
+                principalInput.classList.toggle('input-error', isNaN(principal) || principal <= 0);
+                monthsInput.classList.toggle('input-error', isNaN(months) || months <= 0);
+                rateInput.classList.toggle('input-error', isNaN(rate) || rate <= 0);
+                interestResult.innerText = '$0.00';
+                totalResult.innerText = '$0.00';
+                interestResult.className = 'result-value neutral';
+                totalResult.className = 'result-value neutral';
+                return;
+            }
+
+            // Check for extremely large inputs
+            if (principal > 1e12 || months > 1e3 || rate > 1e3) {
+                principalInput.classList.toggle('input-error', principal > 1e12);
+                monthsInput.classList.toggle('input-error', months > 1e3);
+                rateInput.classList.toggle('input-error', rate > 1e3);
+                interestResult.innerText = '$0.00';
+                totalResult.innerText = '$0.00';
+                interestResult.className = 'result-value neutral';
+                totalResult.className = 'result-value neutral';
+                return;
+            }
+
+            const timeInYears = months / 12;
+            const interest = principal * (rate / 100) * timeInYears;
+            const total = principal + interest;
+
+            // Update results
+            interestResult.innerText = `$${interest.toFixed(2)}`;
+            totalResult.innerText = `$${total.toFixed(2)}`;
+            interestResult.className = 'result-value positive';
+            totalResult.className = 'result-value neutral';
+        }
+
         // Theme toggle functionality
         document.getElementById('themeToggle').addEventListener('click', function() {
             document.body.classList.toggle('dark-mode');
@@ -525,12 +618,15 @@
                         calculateDiscount2();
                     } else if (field.id.includes('startChargeDate') || field.id.includes('monthRenew') || field.id.includes('freeMonth')) {
                         calculateEndDate();
+                    } else if (field.id.includes('principal') || field.id.includes('months') || field.id.includes('rate')) {
+                        calculateInterest();
                     }
                 });
             });
             
             // Initial calculations
             calculateEndDate();
+            calculateInterest();
         });
     </script>
 </body>
