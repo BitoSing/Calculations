@@ -352,7 +352,7 @@
                 <h2>
                     <span class="icon-container">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a Risky.5.5 0 11-1 0 .5.5 0 011 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z" />
                         </svg>
                     </span>
                     Discount Percentage Finder
@@ -471,10 +471,10 @@
                     <div class="input-field">
                         <label for="daysOfMonth">Days in Month <span class="language-label">ថ្ងៃក្នុងខែ</span></label>
                         <select id="daysOfMonth">
-                            <option value="28">28 Days</option>
-                            <option value="29">29 Days</option>
-                            <option value="30">30 Days</option>
                             <option value="31">31 Days</option>
+                            <option value="30">30 Days</option>
+                            <option value="29">29 Days</option>
+                            <option value="28">28 Days</option>
                         </select>
                     </div>
                 </div>
@@ -504,18 +504,26 @@
                     <div class="input-field">
                         <label for="extraDaysOfMonth">Days in Month <span class="language-label">ថ្ងៃក្នុងខែ</span></label>
                         <select id="extraDaysOfMonth">
-                            <option value="28">28 Days</option>
-                            <option value="29">29 Days</option>
-                            <option value="30">30 Days</option>
                             <option value="31">31 Days</option>
+                            <option value="30">30 Days</option>
+                            <option value="29">29 Days</option>
+                            <option value="28">28 Days</option>
                         </select>
                     </div>
                     <div class="input-field">
-                        <label for="daysToCharge">Days to Charge <span class="language-label">ថ្ងៃត្រូវគិតថ្លៃ</span></label>
-                        <input type="text" id="daysToCharge" placeholder="Enter days to charge" pattern="[0-9,.]+" data-step="1">
+                        <label for="changeDateFrom">Change Date From <span class="language-label">ផ្លាស់ប្តូរកាលបរិច្ឆេទពី</span></label>
+                        <input type="date" id="changeDateFrom">
+                    </div>
+                    <div class="input-field">
+                        <label for="changeDateTo">Change Date To <span class="language-label">ផ្លាស់ប្តូរកាលបរិច្ឆេទទៅ</span></label>
+                        <input type="date" id="changeDateTo">
                     </div>
                 </div>
                 <div class="results">
+                    <div class="result-item">
+                        <span class="result-label">Days to Charge <span class="language-label">ថ្ងៃត្រូវគិតថ្លៃ</span>:</span>
+                        <span class="result-value neutral" id="daysToChargeResult">0 Days</span>
+                    </div>
                     <div class="result-item">
                         <span class="result-label">Extra Charge <span class="language-label">ថ្លៃបន្ថែម</span>:</span>
                         <span class="result-value neutral" id="extraCharge">$0.00</span>
@@ -742,41 +750,73 @@
         function calculateExtraCharge() {
             const monthlyFeeInput = document.getElementById('extraMonthlyFee');
             const daysOfMonthInput = document.getElementById('extraDaysOfMonth');
-            const daysToChargeInput = document.getElementById('daysToCharge');
+            const changeDateFromInput = document.getElementById('changeDateFrom');
+            const changeDateToInput = document.getElementById('changeDateTo');
             const extraChargeResult = document.getElementById('extraCharge');
+            const daysToChargeResult = document.getElementById('daysToChargeResult');
 
             const monthlyFee = parseFloat(stripSeparators(monthlyFeeInput.value));
             const daysOfMonth = parseInt(daysOfMonthInput.value);
-            const daysToCharge = parseFloat(stripSeparators(daysToChargeInput.value));
+            const changeDateFrom = changeDateFromInput.value;
+            const changeDateTo = changeDateToInput.value;
 
             // Reset error states
             monthlyFeeInput.classList.remove('input-error');
-            daysToChargeInput.classList.remove('input-error');
+            changeDateFromInput.classList.remove('input-error');
+            changeDateToInput.classList.remove('input-error');
 
             // Validate inputs
-            if (isNaN(monthlyFee) || isNaN(daysToCharge) || monthlyFee <= 0 || daysToCharge < 0) {
-                monthlyFeeInput.classList.add('input-error', isNaN(monthlyFee) || monthlyFee <= 0);
-                daysToChargeInput.classList.add('input-error', isNaN(daysToCharge) || daysToCharge < 0);
+            if (isNaN(monthlyFee) || monthlyFee <= 0) {
+                monthlyFeeInput.classList.add('input-error');
                 extraChargeResult.innerText = '$0.00';
+                daysToChargeResult.innerText = '0 Days';
                 extraChargeResult.className = 'result-value neutral';
+                daysToChargeResult.className = 'result-value neutral';
                 return;
             }
 
             // Check for extremely large inputs
-            if (monthlyFee > 1e12 || daysToCharge > daysOfMonth) {
-                monthlyFeeInput.classList.add('input-error', monthlyFee > 1e12);
-                daysToChargeInput.classList.add('input-error', daysToCharge > daysOfMonth);
+            if (monthlyFee > 1e12) {
+                monthlyFeeInput.classList.add('input-error');
                 extraChargeResult.innerText = '$0.00';
+                daysToChargeResult.innerText = '0 Days';
                 extraChargeResult.className = 'result-value neutral';
+                daysToChargeResult.className = 'result-value neutral';
+                return;
+            }
+
+            let daysToCharge = 0;
+            if (changeDateFrom && changeDateTo) {
+                const fromDate = new Date(changeDateFrom);
+                const toDate = new Date(changeDateTo);
+                if (toDate >= fromDate) {
+                    // Calculate difference in days (including both start and end dates)
+                    const timeDiff = toDate - fromDate;
+                    daysToCharge = Math.floor(timeDiff / (1000 * 60 * 60 * 24)) + 1;
+                } else {
+                    changeDateToInput.classList.add('input-error');
+                    extraChargeResult.innerText = '$0.00';
+                    daysToChargeResult.innerText = '0 Days';
+                    extraChargeResult.className = 'result-value neutral';
+                    daysToChargeResult.className = 'result-value neutral';
+                    return;
+                }
+            } else {
+                extraChargeResult.innerText = '$0.00';
+                daysToChargeResult.innerText = '0 Days';
+                extraChargeResult.className = 'result-value neutral';
+                daysToChargeResult.className = 'result-value neutral';
                 return;
             }
 
             // Calculate extra charge: (monthly fee / days of month) * days to charge
             const extraCharge = (monthlyFee / daysOfMonth) * daysToCharge;
 
-            // Update result
+            // Update results
             extraChargeResult.innerText = `$${formatNumber(extraCharge)}`;
+            daysToChargeResult.innerText = `${daysToCharge} Days`;
             extraChargeResult.className = 'result-value positive';
+            daysToChargeResult.className = 'result-value positive';
         }
 
         // Theme toggle functionality
@@ -794,9 +834,10 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Set today's date as default for date input
+            // Set today's date as default for date inputs
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('startChargeDate').value = today;
+            document.getElementById('changeDateFrom').value = today;
             
             const inputFields = document.querySelectorAll('input, select');
             inputFields.forEach(field => {
@@ -819,7 +860,7 @@
                         calculateInterest();
                     } else if (field.id.includes('monthlyFee') || field.id.includes('remainingFee') || field.id.includes('daysOfMonth')) {
                         calculateProRateDays();
-                    } else if (field.id.includes('extraMonthlyFee') || field.id.includes('extraDaysOfMonth') || field.id.includes('daysToCharge')) {
+                    } else if (field.id.includes('extraMonthlyFee') || field.id.includes('extraDaysOfMonth') || field.id.includes('changeDateFrom') || field.id.includes('changeDateTo')) {
                         calculateExtraCharge();
                     }
                 });
