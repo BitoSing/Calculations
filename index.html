@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Business Calculator</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Khmer+OS+Siemreap&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
         :root {
             --primary: #4a6fa5; /* Softer blue */
@@ -394,7 +395,7 @@
                 <div class="input-group">
                     <div class="input-field">
                         <label for="startChargeDate">Start Date <span class="language-label">ថ្ងៃចាប់ផ្តើម</span></label>
-                        <input type="date" id="startChargeDate">
+                        <input type="text" id="startChargeDate" placeholder="DD / MMM / YYYY" class="date-picker">
                     </div>
                     <div class="input-field">
                         <label for="monthRenew">Billing Months <span class="language-label">ខែបន្ត</span></label>
@@ -408,7 +409,7 @@
                 <div class="results">
                     <div class="result-item">
                         <span class="result-label">Expiry Date <span class="language-label">ថ្ងៃផុតកំណត់</span>:</span>
-                        <input type="text" id="endDate" class="date-result" readonly value="DD-Mon-YYYY">
+                        <input type="text" id="endDate" class="date-result" readonly value="DD / MMM / YYYY">
                     </div>
                 </div>
             </div>
@@ -512,11 +513,11 @@
                     </div>
                     <div class="input-field">
                         <label for="changeDateFrom">Change Date From <span class="language-label">ផ្លាស់ប្តូរកាលបរិច្ឆេទពី</span></label>
-                        <input type="date" id="changeDateFrom">
+                        <input type="text" id="changeDateFrom" placeholder="DD / MMM / YYYY" class="date-picker">
                     </div>
                     <div class="input-field">
                         <label for="changeDateTo">Change Date To <span class="language-label">ផ្លាស់ប្តូរកាលបរិច្ឆេទទៅ</span></label>
-                        <input type="date" id="changeDateTo">
+                        <input type="text" id="changeDateTo" placeholder="DD / MMM / YYYY" class="date-picker">
                     </div>
                 </div>
                 <div class="results">
@@ -533,6 +534,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
         // Format number for output (thousand separators)
         function formatNumber(num) {
@@ -566,6 +568,32 @@
             } else {
                 input.value = integerPart;
             }
+        }
+
+        // Date format function (DD / MMM / YYYY)
+        function formatDate(date) {
+            const day = date.getDate().toString().padStart(2, '0');
+            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            const month = monthNames[date.getMonth()];
+            const year = date.getFullYear();
+            return `${day} / ${month} / ${year}`;
+        }
+
+        // Parse date from DD / MMM / YYYY format to Date object
+        function parseCustomDate(dateString) {
+            const parts = dateString.split(' / ');
+            if (parts.length !== 3) return null;
+
+            const day = parseInt(parts[0], 10);
+            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            const month = monthNames.indexOf(parts[1]);
+            const year = parseInt(parts[2], 10);
+
+            if (isNaN(day) || month === -1 || isNaN(year)) return null;
+
+            const date = new Date(year, month, day);
+            if (isNaN(date.getTime())) return null;
+            return date;
         }
 
         function calculateDiscount() {
@@ -628,21 +656,18 @@
             }
         }
 
-        function formatDate(date) {
-            const day = date.getDate().toString().padStart(2, '0');
-            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-            const month = monthNames[date.getMonth()];
-            const year = date.getFullYear();
-            return `${day}-${month}-${year}`;
-        }
-
         function calculateEndDate() {
-            const startChargeDate = document.getElementById('startChargeDate').value;
+            const startChargeDateInput = document.getElementById('startChargeDate');
+            const startChargeDate = parseCustomDate(startChargeDateInput.value);
             const monthRenew = parseInt(stripSeparators(document.getElementById('monthRenew').value));
             const freeMonth = document.getElementById('freeMonth').value ? parseInt(stripSeparators(document.getElementById('freeMonth').value)) : 0;
 
+            // Reset error state
+            startChargeDateInput.classList.remove('input-error');
+
             if (!startChargeDate || isNaN(monthRenew)) {
-                document.getElementById('endDate').value = 'DD-Mon-YYYY';
+                startChargeDateInput.classList.add('input-error', !startChargeDate);
+                document.getElementById('endDate').value = 'DD / MMM / YYYY';
                 return;
             }
 
@@ -707,40 +732,53 @@
             totalResult.className = 'result-value neutral';
         }
 
+        // Track user interaction for Pro Rate Day Calculator inputs
+        let hasInteractedWithProRateInputs = false;
+
         function calculateProRateDays() {
             const monthlyFeeInput = document.getElementById('monthlyFee');
             const remainingFeeInput = document.getElementById('remainingFee');
             const daysOfMonthInput = document.getElementById('daysOfMonth');
             const proRateDaysResult = document.getElementById('proRateDays');
 
-            const monthlyFee = parseFloat(stripSeparators(monthlyFeeInput.value));
-            const remainingFee = parseFloat(stripSeparators(remainingFeeInput.value));
+            const monthlyFee = stripSeparators(monthlyFeeInput.value) || '';
+            const remainingFee = stripSeparators(remainingFeeInput.value) || '';
             const daysOfMonth = parseInt(daysOfMonthInput.value);
 
             // Reset error states
             monthlyFeeInput.classList.remove('input-error');
             remainingFeeInput.classList.remove('input-error');
 
-            // Validate inputs
-            if (isNaN(monthlyFee) || isNaN(remainingFee) || monthlyFee <= 0 || remainingFee < 0) {
-                monthlyFeeInput.classList.add('input-error', isNaN(monthlyFee) || monthlyFee <= 0);
-                remainingFeeInput.classList.add('input-error', isNaN(remainingFee) || remainingFee < 0);
+            // Only validate if user has interacted
+            if (!hasInteractedWithProRateInputs) return;
+
+            const monthlyFeeNum = parseFloat(monthlyFee);
+            const remainingFeeNum = parseFloat(remainingFee);
+
+            if (isNaN(monthlyFeeNum) || monthlyFeeNum <= 0) {
+                monthlyFeeInput.classList.add('input-error');
+            }
+            if (isNaN(remainingFeeNum) || remainingFeeNum < 0) {
+                remainingFeeInput.classList.add('input-error');
+            }
+
+            // Check for extremely large inputs
+            if (monthlyFeeNum > 1e12 || remainingFeeNum > 1e12) {
+                monthlyFeeInput.classList.add('input-error', monthlyFeeNum > 1e12);
+                remainingFeeInput.classList.add('input-error', remainingFeeNum > 1e12);
                 proRateDaysResult.innerText = '0 Days';
                 proRateDaysResult.className = 'result-value neutral';
                 return;
             }
 
-            // Check for extremely large inputs
-            if (monthlyFee > 1e12 || remainingFee > 1e12) {
-                monthlyFeeInput.classList.add('input-error', monthlyFee > 1e12);
-                remainingFeeInput.classList.add('input-error', remainingFee > 1e12);
+            if (isNaN(monthlyFeeNum) || monthlyFeeNum <= 0 || remainingFeeNum === 0) {
                 proRateDaysResult.innerText = '0 Days';
                 proRateDaysResult.className = 'result-value neutral';
                 return;
             }
 
             // Calculate pro-rated days: (remaining fee * days of month) / monthly fee
-            const proRateDays = (remainingFee * daysOfMonth) / monthlyFee;
+            const proRateDays = (remainingFeeNum * daysOfMonth) / monthlyFeeNum;
 
             // Update result
             proRateDaysResult.innerText = `${Math.round(proRateDays)} Days`;
@@ -755,7 +793,7 @@
             const extraChargeResult = document.getElementById('extraCharge');
             const daysToChargeResult = document.getElementById('daysToChargeResult');
 
-            const monthlyFee = parseFloat(stripSeparators(monthlyFeeInput.value));
+            const monthlyFee = stripSeparators(monthlyFeeInput.value) || '';
             const daysOfMonth = parseInt(daysOfMonthInput.value);
             const changeDateFrom = changeDateFromInput.value;
             const changeDateTo = changeDateToInput.value;
@@ -766,7 +804,8 @@
             changeDateToInput.classList.remove('input-error');
 
             // Validate inputs
-            if (isNaN(monthlyFee) || monthlyFee <= 0) {
+            const monthlyFeeNum = parseFloat(monthlyFee);
+            if (isNaN(monthlyFeeNum) || monthlyFeeNum <= 0) {
                 monthlyFeeInput.classList.add('input-error');
                 extraChargeResult.innerText = '$0.00';
                 daysToChargeResult.innerText = '0 Days';
@@ -776,7 +815,7 @@
             }
 
             // Check for extremely large inputs
-            if (monthlyFee > 1e12) {
+            if (monthlyFeeNum > 1e12) {
                 monthlyFeeInput.classList.add('input-error');
                 extraChargeResult.innerText = '$0.00';
                 daysToChargeResult.innerText = '0 Days';
@@ -787,8 +826,17 @@
 
             let daysToCharge = 0;
             if (changeDateFrom && changeDateTo) {
-                const fromDate = new Date(changeDateFrom);
-                const toDate = new Date(changeDateTo);
+                const fromDate = parseCustomDate(changeDateFrom);
+                const toDate = parseCustomDate(changeDateTo);
+                if (!fromDate || !toDate) {
+                    if (!fromDate) changeDateFromInput.classList.add('input-error');
+                    if (!toDate) changeDateToInput.classList.add('input-error');
+                    extraChargeResult.innerText = '$0.00';
+                    daysToChargeResult.innerText = '0 Days';
+                    extraChargeResult.className = 'result-value neutral';
+                    daysToChargeResult.className = 'result-value neutral';
+                    return;
+                }
                 if (toDate >= fromDate) {
                     // Calculate difference in days (including both start and end dates)
                     const timeDiff = toDate - fromDate;
@@ -802,6 +850,8 @@
                     return;
                 }
             } else {
+                if (!changeDateFrom) changeDateFromInput.classList.add('input-error');
+                if (!changeDateTo) changeDateToInput.classList.add('input-error');
                 extraChargeResult.innerText = '$0.00';
                 daysToChargeResult.innerText = '0 Days';
                 extraChargeResult.className = 'result-value neutral';
@@ -810,7 +860,7 @@
             }
 
             // Calculate extra charge: (monthly fee / days of month) * days to charge
-            const extraCharge = (monthlyFee / daysOfMonth) * daysToCharge;
+            const extraCharge = (monthlyFeeNum / daysOfMonth) * daysToCharge;
 
             // Update results
             extraChargeResult.innerText = `$${formatNumber(extraCharge)}`;
@@ -834,17 +884,35 @@
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Set today's date as default for date inputs
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('startChargeDate').value = today;
-            document.getElementById('changeDateFrom').value = today;
-            
+            // Initialize Flatpickr for date pickers
+            flatpickr('.date-picker', {
+                dateFormat: 'd / M / Y',
+                defaultDate: new Date(),
+                onChange: function(selectedDates, dateStr, instance) {
+                    if (instance.element.id === 'startChargeDate') calculateEndDate();
+                    if (instance.element.id === 'changeDateFrom' || instance.element.id === 'changeDateTo') calculateExtraCharge();
+                }
+            });
+
+            // Initial calculations without applying errors
+            calculateEndDate();
+            calculateProRateDays(); // Will not apply input-error on initial load
+            calculateExtraCharge();
+
             const inputFields = document.querySelectorAll('input, select');
             inputFields.forEach(field => {
                 // Format number inputs with thousand separators
                 if (field.type === 'text' && field.pattern === '[0-9,.]+') {
                     field.addEventListener('input', function() {
                         formatInputNumber(this);
+                    });
+                }
+
+                // Track user interaction for Pro Rate Day Calculator inputs
+                if (field.id === 'monthlyFee' || field.id === 'remainingFee') {
+                    field.addEventListener('input', function() {
+                        hasInteractedWithProRateInputs = true;
+                        calculateProRateDays();
                     });
                 }
 
@@ -865,11 +933,6 @@
                     }
                 });
             });
-            
-            // Initial calculations
-            calculateEndDate();
-            calculateProRateDays();
-            calculateExtraCharge();
         });
     </script>
 </body>
