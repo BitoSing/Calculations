@@ -406,6 +406,10 @@
                         <label for="freeMonth">Free Months <span class="language-label">ខែមិនគិតថ្លៃ</span></label>
                         <input type="text" id="freeMonth" placeholder="Enter free months" pattern="[0-9,.]+">
                     </div>
+                    <div class="input-field">
+                        <label for="additionalDays">Additional Days <span class="language-label">ថ្ងៃបន្ថែម</span></label>
+                        <input type="text" id="additionalDays" placeholder="Enter days" pattern="[-+]?[0-9,.]+">
+                    </div>
                 </div>
                 <div class="results">
                     <div class="result-item">
@@ -549,7 +553,7 @@
 
         // Format input value with thousand separators
         function formatInputNumber(input) {
-            let value = input.value.replace(/[^0-9.]/g, ''); // Allow only numbers and dots
+            let value = input.value.replace(/[^0-9.-]/g, ''); // Allow numbers, dots, and negative sign
             const step = input.getAttribute('data-step');
             const isInteger = step === '1';
 
@@ -629,7 +633,7 @@
             const priceAfterDiscount = parseFloat(stripSeparators(document.getElementById('priceAfterDiscount').value));
             
             if (isNaN(originalPrice) || isNaN(priceAfterDiscount)) {
-                document.getElementById('resultOfDiscount').innerText = 'stdint';
+                document.getElementById('resultOfDiscount').innerText = '0.00%';
                 document.getElementById('losingProfit2').innerText = '$0.00';
                 document.getElementById('resultOfDiscount').className = 'result-value neutral';
                 document.getElementById('losingProfit2').className = 'result-value neutral';
@@ -662,9 +666,12 @@
             const startChargeDate = parseCustomDate(startChargeDateInput.value);
             const monthRenew = parseInt(stripSeparators(document.getElementById('monthRenew').value));
             const freeMonth = document.getElementById('freeMonth').value ? parseInt(stripSeparators(document.getElementById('freeMonth').value)) : 0;
+            const additionalDaysInput = document.getElementById('additionalDays');
+            const additionalDays = additionalDaysInput.value ? parseInt(stripSeparators(additionalDaysInput.value.replace(/^[+-]/, ''))) : 0;
 
             // Reset error state
             startChargeDateInput.classList.remove('input-error');
+            additionalDaysInput.classList.remove('input-error');
 
             if (!startChargeDate || isNaN(monthRenew)) {
                 startChargeDateInput.classList.add('input-error', !startChargeDate);
@@ -676,7 +683,7 @@
             const totalMonths = monthRenew + freeMonth;
             
             startDate.setMonth(startDate.getMonth() + totalMonths);
-            startDate.setDate(startDate.getDate() - 1);
+            startDate.setDate(startDate.getDate() - 1 + additionalDays);
 
             const endDate = formatDate(startDate);
             document.getElementById('endDate').value = endDate;
@@ -918,7 +925,7 @@
             const inputFields = document.querySelectorAll('input, select');
             inputFields.forEach(field => {
                 // Format number inputs with thousand separators
-                if (field.type === 'text' && field.pattern === '[0-9,.]+') {
+                if (field.type === 'text' && field.pattern === '[0-9,.]+' || field.id === 'additionalDays') {
                     field.addEventListener('input', function() {
                         formatInputNumber(this);
                     });
@@ -946,7 +953,7 @@
                         calculateDiscount();
                     } else if (field.id.includes('originalPrice2') || field.id.includes('priceAfterDiscount')) {
                         calculateDiscount2();
-                    } else if (field.id.includes('startChargeDate') || field.id.includes('monthRenew') || field.id.includes('freeMonth')) {
+                    } else if (field.id.includes('startChargeDate') || field.id.includes('monthRenew') || field.id.includes('freeMonth') || field.id.includes('additionalDays')) {
                         calculateEndDate();
                     } else if (field.id.includes('principal') || field.id.includes('months') || field.id.includes('rate')) {
                         calculateInterest();
