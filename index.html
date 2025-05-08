@@ -8,15 +8,15 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
         :root {
-            --primary: #4a6fa5; /* Softer blue */
+            --primary: #4a6fa5;
             --primary-light: #e8f0fe;
-            --secondary: #3a5683; /* Darker blue */
-            --success: #50a773; /* Softer green */
-            --danger: #c65d57; /* Softer red */
-            --warning: #d9a441; /* Muted gold */
-            --dark: #2d3748; /* Dark gray-blue */
-            --light: #f7fafc; /* Very light gray */
-            --gray: #718096; /* Medium gray */
+            --secondary: #3a5683;
+            --success: #50a773;
+            --danger: #c65d57;
+            --warning: #d9a441;
+            --dark: #2d3748;
+            --light: #f7fafc;
+            --gray: #718096;
             --border-radius: 10px;
             --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
             --transition: all 0.3s ease;
@@ -30,7 +30,7 @@
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f4f8; /* Very light blue-gray */
+            background-color: #f0f4f8;
             color: var(--dark);
             line-height: 1.6;
             padding: 20px;
@@ -73,7 +73,7 @@
             box-shadow: var(--box-shadow);
             padding: 25px;
             transition: var(--transition);
-            border: 1px solid #e2e8f0; /* Light border */
+            border: 1px solid #e2e8f0;
         }
 
         .calculator-card:hover {
@@ -225,7 +225,6 @@
             }
         }
 
-        /* Tooltip */
         .tooltip {
             position: relative;
             display: inline-block;
@@ -256,7 +255,6 @@
             opacity: 1;
         }
 
-        /* Dark mode toggle */
         .theme-toggle {
             position: absolute;
             top: 20px;
@@ -268,7 +266,6 @@
             font-size: 1.2rem;
         }
 
-        /* Dark mode styles */
         body.dark-mode {
             background-color: #1a202c;
             color: #e2e8f0;
@@ -408,7 +405,7 @@
                     </div>
                     <div class="input-field">
                         <label for="additionalDays">Additional Days <span class="language-label">ថ្ងៃបន្ថែម</span></label>
-                        <input type="text" id="additionalDays" placeholder="Enter days" pattern="[-+]?[0-9,.]+">
+                        <input type="text" id="additionalDays" placeholder="Enter days (use - to subtract)" pattern="[-]?[0-9]+">
                     </div>
                 </div>
                 <div class="results">
@@ -553,21 +550,34 @@
 
         // Format input value with thousand separators
         function formatInputNumber(input) {
-            let value = input.value.replace(/[^0-9.-]/g, ''); // Allow numbers, dots, and negative sign
+            let value = input.value.replace(/[^0-9.-]/g, '');
             const step = input.getAttribute('data-step');
             const isInteger = step === '1';
+            const isAdditionalDays = input.id === 'additionalDays';
 
-            // Split into integer and decimal parts
+            if (isAdditionalDays) {
+                // For additionalDays, allow negative sign and integers only
+                const isNegative = value.startsWith('-');
+                value = value.replace(/[^0-9-]/g, '');
+                if (isNegative && !value.startsWith('-')) {
+                    value = '-' + value;
+                }
+                input.value = value;
+                return;
+            }
+
             let [integerPart, decimalPart] = value.split('.');
 
-            // Format integer part with thousand separators
+            const isNegative = integerPart.startsWith('-');
+            if (isNegative) integerPart = integerPart.slice(1);
+
             integerPart = parseInt(integerPart || '0').toLocaleString('en-US');
 
-            // Handle decimal part based on step
+            if (isNegative) integerPart = '-' + integerPart;
+
             if (isInteger) {
                 input.value = integerPart;
             } else if (decimalPart !== undefined) {
-                // Limit decimal to 2 places for fields with step="0.01"
                 decimalPart = decimalPart.slice(0, 2);
                 input.value = `${integerPart}.${decimalPart}`;
             } else {
@@ -667,7 +677,7 @@
             const monthRenew = parseInt(stripSeparators(document.getElementById('monthRenew').value));
             const freeMonth = document.getElementById('freeMonth').value ? parseInt(stripSeparators(document.getElementById('freeMonth').value)) : 0;
             const additionalDaysInput = document.getElementById('additionalDays');
-            const additionalDays = additionalDaysInput.value ? parseInt(stripSeparators(additionalDaysInput.value.replace(/^[+-]/, ''))) : 0;
+            const additionalDays = additionalDaysInput.value ? parseInt(stripSeparators(additionalDaysInput.value)) : 0;
 
             // Reset error state
             startChargeDateInput.classList.remove('input-error');
@@ -679,10 +689,17 @@
                 return;
             }
 
+            if (isNaN(additionalDays)) {
+                additionalDaysInput.classList.add('input-error');
+                document.getElementById('endDate').value = 'DD / MMM / YYYY';
+                return;
+            }
+
             const startDate = new Date(startChargeDate);
             const totalMonths = monthRenew + freeMonth;
             
             startDate.setMonth(startDate.getMonth() + totalMonths);
+            // Adjust date: subtract 1 day as per original logic, then apply additional days (positive adds, negative subtracts)
             startDate.setDate(startDate.getDate() - 1 + additionalDays);
 
             const endDate = formatDate(startDate);
@@ -733,14 +750,12 @@
             const interest = principal * (rate / 100) * timeInYears;
             const total = principal + interest;
 
-            // Update results with thousand separators
             interestResult.innerText = `$${formatNumber(interest)}`;
             totalResult.innerText = `$${formatNumber(total)}`;
             interestResult.className = 'result-value positive';
             totalResult.className = 'result-value neutral';
         }
 
-        // Track user interaction for Pro Rate Day Calculator inputs
         let hasInteractedWithProRateInputs = false;
 
         function calculateProRateDays() {
@@ -753,11 +768,9 @@
             const remainingFee = stripSeparators(remainingFeeInput.value) || '';
             const daysOfMonth = parseInt(daysOfMonthInput.value);
 
-            // Reset error states
             monthlyFeeInput.classList.remove('input-error');
             remainingFeeInput.classList.remove('input-error');
 
-            // Only validate if user has interacted
             if (!hasInteractedWithProRateInputs) return;
 
             const monthlyFeeNum = parseFloat(monthlyFee);
@@ -770,7 +783,6 @@
                 remainingFeeInput.classList.add('input-error');
             }
 
-            // Check for extremely large inputs
             if (monthlyFeeNum > 1e12 || remainingFeeNum > 1e12) {
                 monthlyFeeInput.classList.add('input-error', monthlyFeeNum > 1e12);
                 remainingFeeInput.classList.add('input-error', remainingFeeNum > 1e12);
@@ -785,15 +797,12 @@
                 return;
             }
 
-            // Calculate pro-rated days: (remaining fee * days of month) / monthly fee
             const proRateDays = (remainingFeeNum * daysOfMonth) / monthlyFeeNum;
 
-            // Update result
             proRateDaysResult.innerText = `${Math.round(proRateDays)} Days`;
             proRateDaysResult.className = 'result-value positive';
         }
 
-        // Track user interaction for Change Billing Date Fee Calculator inputs
         let hasInteractedWithExtraChargeInputs = false;
 
         function calculateExtraCharge() {
@@ -809,12 +818,10 @@
             const changeDateFrom = changeDateFromInput.value;
             const changeDateTo = changeDateToInput.value;
 
-            // Reset error states
             monthlyFeeInput.classList.remove('input-error');
             changeDateFromInput.classList.remove('input-error');
             changeDateToInput.classList.remove('input-error');
 
-            // Only validate if user has interacted
             if (!hasInteractedWithExtraChargeInputs) {
                 extraChargeResult.innerText = '$0.00';
                 daysToChargeResult.innerText = '0 Days';
@@ -823,7 +830,6 @@
                 return;
             }
 
-            // Validate inputs
             const monthlyFeeNum = parseFloat(monthlyFee);
             if (isNaN(monthlyFeeNum) || monthlyFeeNum <= 0) {
                 monthlyFeeInput.classList.add('input-error');
@@ -834,7 +840,6 @@
                 return;
             }
 
-            // Check for extremely large inputs
             if (monthlyFeeNum > 1e12) {
                 monthlyFeeInput.classList.add('input-error');
                 extraChargeResult.innerText = '$0.00';
@@ -858,7 +863,6 @@
                     return;
                 }
                 if (toDate > fromDate) {
-                    // Calculate difference in days, starting from the day after fromDate
                     const timeDiff = toDate - fromDate;
                     daysToCharge = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
                 } else {
@@ -879,17 +883,14 @@
                 return;
             }
 
-            // Calculate extra charge: (monthly fee / days of month) * days to charge
             const extraCharge = (monthlyFeeNum / daysOfMonth) * daysToCharge;
 
-            // Update results
             extraChargeResult.innerText = `$${formatNumber(extraCharge)}`;
             daysToChargeResult.innerText = `${daysToCharge} Days`;
             extraChargeResult.className = 'result-value positive';
             daysToChargeResult.className = 'result-value positive';
         }
 
-        // Theme toggle functionality
         document.getElementById('themeToggle').addEventListener('click', function() {
             document.body.classList.toggle('dark-mode');
             const isDarkMode = document.body.classList.contains('dark-mode');
@@ -897,14 +898,12 @@
             this.textContent = isDarkMode ? '🌞' : '🌓';
         });
 
-        // Check for saved theme preference
         if (localStorage.getItem('darkMode') === 'true') {
             document.body.classList.add('dark-mode');
             document.getElementById('themeToggle').textContent = '🌞';
         }
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize Flatpickr for date pickers
             flatpickr('.date-picker', {
                 dateFormat: 'd / M / Y',
                 defaultDate: new Date(),
@@ -917,21 +916,18 @@
                 }
             });
 
-            // Initial calculations without applying errors
             calculateEndDate();
-            calculateProRateDays(); // Will not apply input-error on initial load
-            calculateExtraCharge(); // Will not apply input-error on initial load
+            calculateProRateDays();
+            calculateExtraCharge();
 
             const inputFields = document.querySelectorAll('input, select');
             inputFields.forEach(field => {
-                // Format number inputs with thousand separators
-                if (field.type === 'text' && field.pattern === '[0-9,.]+' || field.id === 'additionalDays') {
+                if (field.type === 'text' && (field.pattern === '[0-9,.]+' || field.id === 'additionalDays')) {
                     field.addEventListener('input', function() {
                         formatInputNumber(this);
                     });
                 }
 
-                // Track user interaction for Pro Rate Day Calculator inputs
                 if (field.id === 'monthlyFee' || field.id === 'remainingFee') {
                     field.addEventListener('input', function() {
                         hasInteractedWithProRateInputs = true;
@@ -939,7 +935,6 @@
                     });
                 }
 
-                // Track user interaction for Change Billing Date Fee Calculator inputs
                 if (field.id === 'extraMonthlyFee' || field.id === 'changeDateFrom' || field.id === 'changeDateTo') {
                     field.addEventListener('input', function() {
                         hasInteractedWithExtraChargeInputs = true;
@@ -947,7 +942,6 @@
                     });
                 }
 
-                // Trigger calculations on input
                 field.addEventListener('input', function() {
                     if (field.id.includes('originalPrice') || field.id.includes('discountPercent')) {
                         calculateDiscount();
@@ -965,7 +959,6 @@
                 });
             });
 
-            // Track interaction for daysOfMonth select in Change Billing Date Fee Calculator
             document.getElementById('extraDaysOfMonth').addEventListener('change', function() {
                 hasInteractedWithExtraChargeInputs = true;
                 calculateExtraCharge();
