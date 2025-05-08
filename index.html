@@ -106,6 +106,7 @@
 
         .input-field {
             position: relative;
+            margin-bottom: 10px;
         }
 
         label {
@@ -360,7 +361,7 @@
                 </h2>
                 <div class="input-group">
                     <div class="input-field">
-                        <label for="originalPrice2">Original Price <span class="language-label">ថ្លៃដើម</span></label>
+                        <label for="originalPrice2">Original Price <span class="language-label">*</span></label>
                         <input type="text" id="originalPrice2" placeholder="Enter amount ($)" pattern="[0-9,.]+">
                     </div>
                     <div class="input-field">
@@ -628,7 +629,7 @@
             const priceAfterDiscount = parseFloat(stripSeparators(document.getElementById('priceAfterDiscount').value));
             
             if (isNaN(originalPrice) || isNaN(priceAfterDiscount)) {
-                document.getElementById('resultOfDiscount').innerText = '0.00%';
+                document.getElementById('resultOfDiscount').innerText = 'stdint';
                 document.getElementById('losingProfit2').innerText = '$0.00';
                 document.getElementById('resultOfDiscount').className = 'result-value neutral';
                 document.getElementById('losingProfit2').className = 'result-value neutral';
@@ -785,6 +786,9 @@
             proRateDaysResult.className = 'result-value positive';
         }
 
+        // Track user interaction for Change Billing Date Fee Calculator inputs
+        let hasInteractedWithExtraChargeInputs = false;
+
         function calculateExtraCharge() {
             const monthlyFeeInput = document.getElementById('extraMonthlyFee');
             const daysOfMonthInput = document.getElementById('extraDaysOfMonth');
@@ -802,6 +806,15 @@
             monthlyFeeInput.classList.remove('input-error');
             changeDateFromInput.classList.remove('input-error');
             changeDateToInput.classList.remove('input-error');
+
+            // Only validate if user has interacted
+            if (!hasInteractedWithExtraChargeInputs) {
+                extraChargeResult.innerText = '$0.00';
+                daysToChargeResult.innerText = '0 Days';
+                extraChargeResult.className = 'result-value neutral';
+                daysToChargeResult.className = 'result-value neutral';
+                return;
+            }
 
             // Validate inputs
             const monthlyFeeNum = parseFloat(monthlyFee);
@@ -837,10 +850,10 @@
                     daysToChargeResult.className = 'result-value neutral';
                     return;
                 }
-                if (toDate >= fromDate) {
-                    // Calculate difference in days (including both start and end dates)
+                if (toDate > fromDate) {
+                    // Calculate difference in days, starting from the day after fromDate
                     const timeDiff = toDate - fromDate;
-                    daysToCharge = Math.floor(timeDiff / (1000 * 60 * 60 * 24)) + 1;
+                    daysToCharge = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
                 } else {
                     changeDateToInput.classList.add('input-error');
                     extraChargeResult.innerText = '$0.00';
@@ -890,14 +903,17 @@
                 defaultDate: new Date(),
                 onChange: function(selectedDates, dateStr, instance) {
                     if (instance.element.id === 'startChargeDate') calculateEndDate();
-                    if (instance.element.id === 'changeDateFrom' || instance.element.id === 'changeDateTo') calculateExtraCharge();
+                    if (instance.element.id === 'changeDateFrom' || instance.element.id === 'changeDateTo') {
+                        hasInteractedWithExtraChargeInputs = true;
+                        calculateExtraCharge();
+                    }
                 }
             });
 
             // Initial calculations without applying errors
             calculateEndDate();
             calculateProRateDays(); // Will not apply input-error on initial load
-            calculateExtraCharge();
+            calculateExtraCharge(); // Will not apply input-error on initial load
 
             const inputFields = document.querySelectorAll('input, select');
             inputFields.forEach(field => {
@@ -913,6 +929,14 @@
                     field.addEventListener('input', function() {
                         hasInteractedWithProRateInputs = true;
                         calculateProRateDays();
+                    });
+                }
+
+                // Track user interaction for Change Billing Date Fee Calculator inputs
+                if (field.id === 'extraMonthlyFee' || field.id === 'changeDateFrom' || field.id === 'changeDateTo') {
+                    field.addEventListener('input', function() {
+                        hasInteractedWithExtraChargeInputs = true;
+                        calculateExtraCharge();
                     });
                 }
 
@@ -932,6 +956,12 @@
                         calculateExtraCharge();
                     }
                 });
+            });
+
+            // Track interaction for daysOfMonth select in Change Billing Date Fee Calculator
+            document.getElementById('extraDaysOfMonth').addEventListener('change', function() {
+                hasInteractedWithExtraChargeInputs = true;
+                calculateExtraCharge();
             });
         });
     </script>
