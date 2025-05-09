@@ -63,8 +63,20 @@
 
         .calculator-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 25px;
+        }
+
+        @media (max-width: 1200px) {
+            .calculator-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .calculator-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .calculator-card {
@@ -211,20 +223,6 @@
             padding: 0;
         }
 
-        @media (max-width: 768px) {
-            .calculator-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            h1 {
-                font-size: 1.8rem;
-            }
-
-            .calculator-card {
-                padding: 20px;
-            }
-        }
-
         .tooltip {
             position: relative;
             display: inline-block;
@@ -354,7 +352,7 @@
                 </div>
             </div>
 
-            <!-- Date Calculator -->
+            <!-- Subscription Calculator -->
             <div class="calculator-card">
                 <h2>
                     <span class="icon-container">
@@ -386,42 +384,6 @@
                     <div class="result-item">
                         <span class="result-label">Expiry Date <span class="language-label">ថ្ងៃផុតកំណត់</span>:</span>
                         <input type="text" id="endDate" class="date-result" readonly value="DD / MMM / YYYY">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Interest Calculator -->
-            <div class="calculator-card">
-                <h2>
-                    <span class="icon-container">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </span>
-                    Interest Calculator
-                </h2>
-                <div class="input-group">
-                    <div class="input-field">
-                        <label for="principal">Deposit Amount <span class="language-label">ចំនួនប្រាក់បញ្ញើ</span></label>
-                        <input type="text" id="principal" placeholder="Enter amount ($)" pattern="[0-9,.]+" data-step="0.01">
-                    </div>
-                    <div class="input-field">
-                        <label for="months">Deposit Duration <span class="language-label">រយៈពេលបញ្ញើ (ខែ)</span></label>
-                        <input type="text" id="months" placeholder="Enter months" pattern="[0-9,.]+" data-step="1">
-                    </div>
-                    <div class="input-field">
-                        <label for="rate">Interest Rate <span class="language-label">អត្រាការប្រាក់ (%)</span></label>
-                        <input type="text" id="rate" placeholder="Enter rate (%)" pattern="[0-9,.]+" data-step="0.01">
-                    </div>
-                </div>
-                <div class="results">
-                    <div class="result-item">
-                        <span class="result-label">Interest Earned <span class="language-label">ការប្រាក់</span>:</span>
-                        <span class="result-value neutral" id="interestResult">$0.00</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="result-label">Total Amount <span class="language-label">សរុប</span>:</span>
-                        <span class="result-value neutral" id="totalResult">$0.00</span>
                     </div>
                 </div>
             </div>
@@ -475,6 +437,42 @@
                     <div class="result-item">
                         <span class="result-label">Extra Charge <span class="language-label">ថ្លៃបន្ថែម</span>:</span>
                         <span class="result-value neutral" id="extraCharge">$0.00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interest Calculator -->
+            <div class="calculator-card">
+                <h2>
+                    <span class="icon-container">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </span>
+                    Interest Calculator
+                </h2>
+                <div class="input-group">
+                    <div class="input-field">
+                        <label for="principal">Deposit Amount <span class="language-label">ចំនួនប្រាក់បញ្ញើ</span></label>
+                        <input type="text" id="principal" placeholder="Enter amount ($)" pattern="[0-9,.]+" data-step="0.01">
+                    </div>
+                    <div class="input-field">
+                        <label for="months">Deposit Duration <span class="language-label">រយៈពេលបញ្ញើ (ខែ)</span></label>
+                        <input type="text" id="months" placeholder="Enter months" pattern="[0-9,.]+" data-step="1">
+                    </div>
+                    <div class="input-field">
+                        <label for="rate">Interest Rate <span class="language-label">អត្រាការប្រាក់ (%)</span></label>
+                        <input type="text" id="rate" placeholder="Enter rate (%)" pattern="[0-9,.]+" data-step="0.01">
+                    </div>
+                </div>
+                <div class="results">
+                    <div class="result-item">
+                        <span class="result-label">Interest Earned <span class="language-label">ការប្រាក់</span>:</span>
+                        <span class="result-value neutral" id="interestResult">$0.00</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Total Amount <span class="language-label">សរុប</span>:</span>
+                        <span class="result-value neutral" id="totalResult">$0.00</span>
                     </div>
                 </div>
             </div>
