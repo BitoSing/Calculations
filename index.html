@@ -426,7 +426,7 @@
                 </div>
             </div>
 
-            <!-- Pro Rate Day with Remaining Credit Calculator -->
+            <!-- Billing Adjustment Calculator -->
             <div class="calculator-card">
                 <h2>
                     <span class="icon-container">
@@ -434,58 +434,25 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l4 4m-4-12V4m0 16v-4m-4-4H4m12 0h4m-8 8v4m0-16V4m-4 4H4m12 0h4" />
                         </svg>
                     </span>
-                    Pro Rate Day Calculator
+                    Billing Adjustment Calculator
                 </h2>
                 <div class="input-group">
                     <div class="input-field">
-                        <label for="monthlyFee">Monthly Fee <span class="language-label">ថ្លៃប្រចាំខែ</span></label>
-                        <input type="text" id="monthlyFee" placeholder="Enter monthly fee ($)" pattern="[0-9,.]+" data-step="0.01">
+                        <label for="billingMonthlyFee">Monthly Fee <span class="language-label">ថ្លៃប្រចាំខែ</span></label>
+                        <input type="text" id="billingMonthlyFee" placeholder="Enter monthly fee ($)" pattern="[0-9,.]+" data-step="0.01">
+                    </div>
+                    <div class="input-field">
+                        <label for="billingDaysOfMonth">Days in Month <span class="language-label">ថ្ងៃក្នុងខែ</span></label>
+                        <select id="billingDaysOfMonth">
+                            <option value="31">31 Days</option>
+                            <option value="30">30 Days</option>
+                            <option value="29">29 Days</option>
+                            <option value="28">28 Days</option>
+                        </select>
                     </div>
                     <div class="input-field">
                         <label for="remainingFee">Remaining Fee <span class="language-label">ថ្លៃនៅសល់</span></label>
                         <input type="text" id="remainingFee" placeholder="Enter remaining fee ($)" pattern="[0-9,.]+" data-step="0.01">
-                    </div>
-                    <div class="input-field">
-                        <label for="daysOfMonth">Days in Month <span class="language-label">ថ្ងៃក្នុងខែ</span></label>
-                        <select id="daysOfMonth">
-                            <option value="31">31 Days</option>
-                            <option value="30">30 Days</option>
-                            <option value="29">29 Days</option>
-                            <option value="28">28 Days</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="results">
-                    <div class="result-item">
-                        <span class="result-label">Pro-Rated Days <span class="language-label">ថ្ងៃបន្ថែម</span>:</span>
-                        <span class="result-value neutral" id="proRateDays">0 Days</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Extra Charge for Pro Rate (Change Billing Date Fee) Calculator -->
-            <div class="calculator-card">
-                <h2>
-                    <span class="icon-container">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
-                    </span>
-                    Change Billing Date Fee
-                </h2>
-                <div class="input-group">
-                    <div class="input-field">
-                        <label for="extraMonthlyFee">Monthly Fee <span class="language-label">ថ្លៃប្រចាំខែ</span></label>
-                        <input type="text" id="extraMonthlyFee" placeholder="Enter monthly fee ($)" pattern="[0-9,.]+" data-step="0.01">
-                    </div>
-                    <div class="input-field">
-                        <label for="extraDaysOfMonth">Days in Month <span class="language-label">ថ្ងៃក្នុងខែ</span></label>
-                        <select id="extraDaysOfMonth">
-                            <option value="31">31 Days</option>
-                            <option value="30">30 Days</option>
-                            <option value="29">29 Days</option>
-                            <option value="28">28 Days</option>
-                        </select>
                     </div>
                     <div class="input-field">
                         <label for="changeDateFrom">Change Date From <span class="language-label">ផ្លាស់ប្តូរកាលបរិច្ឆេទពី</span></label>
@@ -497,6 +464,10 @@
                     </div>
                 </div>
                 <div class="results">
+                    <div class="result-item">
+                        <span class="result-label">Pro-Rated Days <span class="language-label">ថ្ងៃបន្ថែម</span>:</span>
+                        <span class="result-value neutral" id="proRateDays">0 Days</span>
+                    </div>
                     <div class="result-item">
                         <span class="result-label">Days to Charge <span class="language-label">ថ្ងៃត្រូវគិតថ្លៃ</span>:</span>
                         <span class="result-value neutral" id="daysToChargeResult">0 Days</span>
@@ -756,110 +727,75 @@
             totalResult.className = 'result-value neutral';
         }
 
-        let hasInteractedWithProRateInputs = false;
-
-        function calculateProRateDays() {
-            const monthlyFeeInput = document.getElementById('monthlyFee');
+        function calculateBillingAdjustment() {
+            // Input elements
+            const monthlyFeeInput = document.getElementById('billingMonthlyFee');
+            const daysOfMonthInput = document.getElementById('billingDaysOfMonth');
             const remainingFeeInput = document.getElementById('remainingFee');
-            const daysOfMonthInput = document.getElementById('daysOfMonth');
-            const proRateDaysResult = document.getElementById('proRateDays');
-
-            const monthlyFee = stripSeparators(monthlyFeeInput.value) || '';
-            const remainingFee = stripSeparators(remainingFeeInput.value) || '';
-            const daysOfMonth = parseInt(daysOfMonthInput.value);
-
-            monthlyFeeInput.classList.remove('input-error');
-            remainingFeeInput.classList.remove('input-error');
-
-            if (!hasInteractedWithProRateInputs) return;
-
-            const monthlyFeeNum = parseFloat(monthlyFee);
-            const remainingFeeNum = parseFloat(remainingFee);
-
-            if (isNaN(monthlyFeeNum) || monthlyFeeNum <= 0) {
-                monthlyFeeInput.classList.add('input-error');
-            }
-            if (isNaN(remainingFeeNum) || remainingFeeNum < 0) {
-                remainingFeeInput.classList.add('input-error');
-            }
-
-            if (monthlyFeeNum > 1e12 || remainingFeeNum > 1e12) {
-                monthlyFeeInput.classList.add('input-error', monthlyFeeNum > 1e12);
-                remainingFeeInput.classList.add('input-error', remainingFeeNum > 1e12);
-                proRateDaysResult.innerText = '0 Days';
-                proRateDaysResult.className = 'result-value neutral';
-                return;
-            }
-
-            if (isNaN(monthlyFeeNum) || monthlyFeeNum <= 0 || remainingFeeNum === 0) {
-                proRateDaysResult.innerText = '0 Days';
-                proRateDaysResult.className = 'result-value neutral';
-                return;
-            }
-
-            const proRateDays = (remainingFeeNum * daysOfMonth) / monthlyFeeNum;
-
-            proRateDaysResult.innerText = `${Math.round(proRateDays)} Days`;
-            proRateDaysResult.className = 'result-value positive';
-        }
-
-        let hasInteractedWithExtraChargeInputs = false;
-
-        function calculateExtraCharge() {
-            const monthlyFeeInput = document.getElementById('extraMonthlyFee');
-            const daysOfMonthInput = document.getElementById('extraDaysOfMonth');
             const changeDateFromInput = document.getElementById('changeDateFrom');
             const changeDateToInput = document.getElementById('changeDateTo');
-            const extraChargeResult = document.getElementById('extraCharge');
+            // Result elements
+            const proRateDaysResult = document.getElementById('proRateDays');
             const daysToChargeResult = document.getElementById('daysToChargeResult');
+            const extraChargeResult = document.getElementById('extraCharge');
 
+            // Input values
             const monthlyFee = stripSeparators(monthlyFeeInput.value) || '';
             const daysOfMonth = parseInt(daysOfMonthInput.value);
+            const remainingFee = stripSeparators(remainingFeeInput.value) || '';
             const changeDateFrom = changeDateFromInput.value;
             const changeDateTo = changeDateToInput.value;
 
+            // Reset error states
             monthlyFeeInput.classList.remove('input-error');
+            remainingFeeInput.classList.remove('input-error');
             changeDateFromInput.classList.remove('input-error');
             changeDateToInput.classList.remove('input-error');
 
-            if (!hasInteractedWithExtraChargeInputs) {
-                extraChargeResult.innerText = '$0.00';
-                daysToChargeResult.innerText = '0 Days';
-                extraChargeResult.className = 'result-value neutral';
-                daysToChargeResult.className = 'result-value neutral';
-                return;
-            }
+            // Reset results
+            proRateDaysResult.innerText = '0 Days';
+            daysToChargeResult.innerText = '0 Days';
+            extraChargeResult.innerText = '$0.00';
+            proRateDaysResult.className = 'result-value neutral';
+            daysToChargeResult.className = 'result-value neutral';
+            extraChargeResult.className = 'result-value neutral';
 
+            // Parse numeric inputs
             const monthlyFeeNum = parseFloat(monthlyFee);
+            const remainingFeeNum = parseFloat(remainingFee);
+
+            // Validate monthly fee (required for both calculations)
+            let isValid = true;
             if (isNaN(monthlyFeeNum) || monthlyFeeNum <= 0) {
                 monthlyFeeInput.classList.add('input-error');
-                extraChargeResult.innerText = '$0.00';
-                daysToChargeResult.innerText = '0 Days';
-                extraChargeResult.className = 'result-value neutral';
-                daysToChargeResult.className = 'result-value neutral';
-                return;
+                isValid = false;
             }
-
             if (monthlyFeeNum > 1e12) {
                 monthlyFeeInput.classList.add('input-error');
-                extraChargeResult.innerText = '$0.00';
-                daysToChargeResult.innerText = '0 Days';
-                extraChargeResult.className = 'result-value neutral';
-                daysToChargeResult.className = 'result-value neutral';
-                return;
+                isValid = false;
             }
 
+            // Pro Rate Days Calculation
+            if (!isNaN(remainingFeeNum) && remainingFeeNum >= 0 && isValid) {
+                if (remainingFeeNum > 1e12) {
+                    remainingFeeInput.classList.add('input-error');
+                } else {
+                    const proRateDays = (remainingFeeNum * daysOfMonth) / monthlyFeeNum;
+                    proRateDaysResult.innerText = `${Math.round(proRateDays)} Days`;
+                    proRateDaysResult.className = 'result-value positive';
+                }
+            } else if (!isNaN(remainingFeeNum) && remainingFeeNum < 0) {
+                remainingFeeInput.classList.add('input-error');
+            }
+
+            // Extra Charge Calculation
             let daysToCharge = 0;
-            if (changeDateFrom && changeDateTo) {
+            if (changeDateFrom && changeDateTo && isValid) {
                 const fromDate = parseCustomDate(changeDateFrom);
                 const toDate = parseCustomDate(changeDateTo);
                 if (!fromDate || !toDate) {
                     if (!fromDate) changeDateFromInput.classList.add('input-error');
                     if (!toDate) changeDateToInput.classList.add('input-error');
-                    extraChargeResult.innerText = '$0.00';
-                    daysToChargeResult.innerText = '0 Days';
-                    extraChargeResult.className = 'result-value neutral';
-                    daysToChargeResult.className = 'result-value neutral';
                     return;
                 }
                 if (toDate > fromDate) {
@@ -867,28 +803,17 @@
                     daysToCharge = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
                 } else {
                     changeDateToInput.classList.add('input-error');
-                    extraChargeResult.innerText = '$0.00';
-                    daysToChargeResult.innerText = '0 Days';
-                    extraChargeResult.className = 'result-value neutral';
-                    daysToChargeResult.className = 'result-value neutral';
                     return;
                 }
-            } else {
+                const extraCharge = (monthlyFeeNum / daysOfMonth) * daysToCharge;
+                daysToChargeResult.innerText = `${daysToCharge} Days`;
+                extraChargeResult.innerText = `$${formatNumber(extraCharge)}`;
+                daysToChargeResult.className = 'result-value positive';
+                extraChargeResult.className = 'result-value positive';
+            } else if ((changeDateFrom || changeDateTo) && isValid) {
                 if (!changeDateFrom) changeDateFromInput.classList.add('input-error');
                 if (!changeDateTo) changeDateToInput.classList.add('input-error');
-                extraChargeResult.innerText = '$0.00';
-                daysToChargeResult.innerText = '0 Days';
-                extraChargeResult.className = 'result-value neutral';
-                daysToChargeResult.className = 'result-value neutral';
-                return;
             }
-
-            const extraCharge = (monthlyFeeNum / daysOfMonth) * daysToCharge;
-
-            extraChargeResult.innerText = `$${formatNumber(extraCharge)}`;
-            daysToChargeResult.innerText = `${daysToCharge} Days`;
-            extraChargeResult.className = 'result-value positive';
-            daysToChargeResult.className = 'result-value positive';
         }
 
         document.getElementById('themeToggle').addEventListener('click', function() {
@@ -910,35 +835,19 @@
                 onChange: function(selectedDates, dateStr, instance) {
                     if (instance.element.id === 'startChargeDate') calculateEndDate();
                     if (instance.element.id === 'changeDateFrom' || instance.element.id === 'changeDateTo') {
-                        hasInteractedWithExtraChargeInputs = true;
-                        calculateExtraCharge();
+                        calculateBillingAdjustment();
                     }
                 }
             });
 
             calculateEndDate();
-            calculateProRateDays();
-            calculateExtraCharge();
+            calculateBillingAdjustment();
 
             const inputFields = document.querySelectorAll('input, select');
             inputFields.forEach(field => {
                 if (field.type === 'text' && (field.pattern === '[0-9,.]+' || field.id === 'additionalDays')) {
                     field.addEventListener('input', function() {
                         formatInputNumber(this);
-                    });
-                }
-
-                if (field.id === 'monthlyFee' || field.id === 'remainingFee') {
-                    field.addEventListener('input', function() {
-                        hasInteractedWithProRateInputs = true;
-                        calculateProRateDays();
-                    });
-                }
-
-                if (field.id === 'extraMonthlyFee' || field.id === 'changeDateFrom' || field.id === 'changeDateTo') {
-                    field.addEventListener('input', function() {
-                        hasInteractedWithExtraChargeInputs = true;
-                        calculateExtraCharge();
                     });
                 }
 
@@ -949,17 +858,14 @@
                         calculateEndDate();
                     } else if (field.id.includes('principal') || field.id.includes('months') || field.id.includes('rate')) {
                         calculateInterest();
-                    } else if (field.id.includes('monthlyFee') || field.id.includes('remainingFee') || field.id.includes('daysOfMonth')) {
-                        calculateProRateDays();
-                    } else if (field.id.includes('extraMonthlyFee') || field.id.includes('extraDaysOfMonth') || field.id.includes('changeDateFrom') || field.id.includes('changeDateTo')) {
-                        calculateExtraCharge();
+                    } else if (field.id.includes('billingMonthlyFee') || field.id.includes('remainingFee') || field.id.includes('billingDaysOfMonth') || field.id.includes('changeDateFrom') || field.id.includes('changeDateTo')) {
+                        calculateBillingAdjustment();
                     }
                 });
             });
 
-            document.getElementById('extraDaysOfMonth').addEventListener('change', function() {
-                hasInteractedWithExtraChargeInputs = true;
-                calculateExtraCharge();
+            document.getElementById('billingDaysOfMonth').addEventListener('change', function() {
+                calculateBillingAdjustment();
             });
         });
     </script>
