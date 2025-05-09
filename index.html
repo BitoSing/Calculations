@@ -341,7 +341,7 @@
                     </div>
                     <div class="result-item">
                         <span class="result-label">Discount Percentage <span class="language-label">ភាគរយបញ្ចុះ</span>:</span>
-                        <span class="result-value neutral" id="resultOfDiscount">0.00%</span>
+                        <span class="result-value neutral" id="resultOfDiscount">0.0000%</span>
                     </div>
                     <div class="result-item">
                         <span class="result-label tooltip">Profit/Loss
@@ -481,8 +481,11 @@
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
-        // Format number for output (thousand separators)
-        function formatNumber(num) {
+        // Format number for output
+        function formatNumber(num, isPercentage = false) {
+            if (isPercentage) {
+                return num.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+            }
             return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
@@ -499,6 +502,7 @@
             const step = input.getAttribute('data-step');
             const isInteger = step === '1';
             const isAdditionalDays = input.id === 'additionalDays';
+            const isDiscountPercent = input.id === 'discountPercent';
 
             if (isAdditionalDays) {
                 const isNegative = value.startsWith('-');
@@ -522,7 +526,8 @@
             if (isInteger) {
                 input.value = integerPart;
             } else if (decimalPart !== undefined) {
-                decimalPart = decimalPart.slice(0, 2);
+                // Allow up to 4 decimal places for discountPercent, 2 for others
+                decimalPart = decimalPart.slice(0, isDiscountPercent ? 4 : 2);
                 input.value = `${integerPart}.${decimalPart}`;
             } else {
                 input.value = integerPart;
@@ -575,7 +580,7 @@
 
             // Reset results
             resultAfterDiscount.innerText = '$0.00';
-            resultOfDiscount.innerText = '0.00%';
+            resultOfDiscount.innerText = '0.0000%';
             losingProfit.innerText = '$0.00';
             resultOfDiscount.className = 'result-value neutral';
             losingProfit.className = 'result-value neutral';
@@ -618,7 +623,7 @@
                 const calculatedLosingProfit = originalPrice - priceAfterDiscount;
 
                 resultAfterDiscount.innerText = `$${formatNumber(priceAfterDiscount)}`;
-                resultOfDiscount.innerText = `${formatNumber(Math.abs(calculatedDiscountPercent))}%`;
+                resultOfDiscount.innerText = `${formatNumber(Math.abs(calculatedDiscountPercent), true)}%`;
                 losingProfit.innerText = `${calculatedLosingProfit > 0 ? '-' : '+'}$${formatNumber(Math.abs(calculatedLosingProfit))}`;
 
                 resultOfDiscount.className = calculatedDiscountPercent > 0 ? 'result-value positive' : calculatedDiscountPercent < 0 ? 'result-value negative' : 'result-value neutral';
@@ -630,7 +635,7 @@
                 const calculatedLosingProfit = originalPrice - priceAfterDiscount;
 
                 resultAfterDiscount.innerText = `$${formatNumber(priceAfterDiscount)}`;
-                resultOfDiscount.innerText = `${formatNumber(Math.abs(calculatedDiscountPercent))}%`;
+                resultOfDiscount.innerText = `${formatNumber(Math.abs(calculatedDiscountPercent), true)}%`;
                 losingProfit.innerText = `${calculatedLosingProfit > 0 ? '-' : '+'}$${formatNumber(Math.abs(calculatedLosingProfit))}`;
 
                 resultOfDiscount.className = calculatedDiscountPercent > 0 ? 'result-value positive' : calculatedDiscountPercent < 0 ? 'result-value negative' : 'result-value neutral';
@@ -643,6 +648,7 @@
                 const calculatedLosingProfit = discountAmount;
 
                 resultAfterDiscount.innerText = `$${formatNumber(calculatedPriceAfterDiscount)}`;
+                resultOfDiscount.innerText = `${formatNumber(discountPercent, true)}%`;
                 losingProfit.innerText = `-${formatNumber(calculatedLosingProfit)}`;
                 losingProfit.className = calculatedLosingProfit > 0 ? 'result-value negative' : 'result-value neutral';
             }
