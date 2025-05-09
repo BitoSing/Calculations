@@ -488,9 +488,11 @@
             return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
-        // Remove thousand separators for calculations
+        // Remove thousand separators and invalid characters for calculations
         function stripSeparators(value) {
-            return value.replace(/,/g, '');
+            if (!value) return '';
+            const cleaned = value.replace(/[, ]/g, '').trim();
+            return cleaned.match(/^[.]*$/) ? '' : cleaned;
         }
 
         // Format input value with thousand separators
@@ -540,6 +542,7 @@
 
         // Parse date from DD / MMM / YYYY format to Date object
         function parseCustomDate(dateString) {
+            if (!dateString) return null;
             const parts = dateString.split(' / ');
             if (parts.length !== 3) return null;
 
@@ -728,31 +731,26 @@
         }
 
         function calculateBillingAdjustment() {
-            // Input elements
             const monthlyFeeInput = document.getElementById('billingMonthlyFee');
             const daysOfMonthInput = document.getElementById('billingDaysOfMonth');
             const remainingFeeInput = document.getElementById('remainingFee');
             const changeDateFromInput = document.getElementById('changeDateFrom');
             const changeDateToInput = document.getElementById('changeDateTo');
-            // Result elements
             const proRateDaysResult = document.getElementById('proRateDays');
             const daysToChargeResult = document.getElementById('daysToChargeResult');
             const extraChargeResult = document.getElementById('extraCharge');
 
-            // Input values
-            const monthlyFee = stripSeparators(monthlyFeeInput.value) || '';
+            const monthlyFee = stripSeparators(monthlyFeeInput.value);
             const daysOfMonth = parseInt(daysOfMonthInput.value);
-            const remainingFee = stripSeparators(remainingFeeInput.value) || '';
-            const changeDateFrom = changeDateFromInput.value;
-            const changeDateTo = changeDateToInput.value;
+            const remainingFee = stripSeparators(remainingFeeInput.value);
+            const changeDateFrom = changeDateFromInput.value.trim();
+            const changeDateTo = changeDateToInput.value.trim();
 
-            // Reset error states
             monthlyFeeInput.classList.remove('input-error');
             remainingFeeInput.classList.remove('input-error');
             changeDateFromInput.classList.remove('input-error');
             changeDateToInput.classList.remove('input-error');
 
-            // Reset results
             proRateDaysResult.innerText = '0 Days';
             daysToChargeResult.innerText = '0 Days';
             extraChargeResult.innerText = '$0.00';
@@ -760,11 +758,9 @@
             daysToChargeResult.className = 'result-value neutral';
             extraChargeResult.className = 'result-value neutral';
 
-            // Parse numeric inputs
             const monthlyFeeNum = parseFloat(monthlyFee);
             const remainingFeeNum = parseFloat(remainingFee);
 
-            // Validate monthly fee (required for both calculations)
             let isValid = true;
             if (isNaN(monthlyFeeNum) || monthlyFeeNum <= 0) {
                 monthlyFeeInput.classList.add('input-error');
@@ -775,8 +771,28 @@
                 isValid = false;
             }
 
-            // Pro Rate Days Calculation
-            if (!isNaN(remainingFeeNum) && remainingFeeNum >= 0 && isValid) {
+            if (isValid && (remainingFee === '' || isNaN(remainingFeeNum) || remainingFeeNum === 0)) {
+                const fromDate = parseCustomDate(changeDateFrom);
+                const toDate = parseCustomDate(changeDateTo);
+                if (fromDate && toDate) {
+                    if (toDate >= fromDate) {
+                        const timeDiff = toDate - fromDate;
+                        const daysToCharge = Math.floor(timeDiff / (1000 * 60 * 60 * 24)) + 1;
+                        const extraCharge = (monthlyFeeNum / daysOfMonth) * daysToCharge;
+                        daysToChargeResult.innerText = `${daysToCharge} Days`;
+                        extraChargeResult.innerText = `$${formatNumber(extraCharge)}`;
+                        daysToChargeResult.className = 'result-value positive';
+                        extraChargeResult.className = 'result-value positive';
+                    } else {
+                        changeDateToInput.classList.add('input-error');
+                    }
+                } else {
+                    if (changeDateFrom && !fromDate) changeDateFromInput.classList.add('input-error');
+                    if (changeDateTo && !toDate) changeDateToInput.classList.add('input-error');
+                }
+            }
+
+            if (isValid && !isNaN(remainingFeeNum) && remainingFeeNum >= 0) {
                 if (remainingFeeNum > 1e12) {
                     remainingFeeInput.classList.add('input-error');
                 } else {
@@ -786,33 +802,6 @@
                 }
             } else if (!isNaN(remainingFeeNum) && remainingFeeNum < 0) {
                 remainingFeeInput.classList.add('input-error');
-            }
-
-            // Extra Charge Calculation
-            let daysToCharge = 0;
-            if (changeDateFrom && changeDateTo && isValid) {
-                const fromDate = parseCustomDate(changeDateFrom);
-                const toDate = parseCustomDate(changeDateTo);
-                if (!fromDate || !toDate) {
-                    if (!fromDate) changeDateFromInput.classList.add('input-error');
-                    if (!toDate) changeDateToInput.classList.add('input-error');
-                    return;
-                }
-                if (toDate > fromDate) {
-                    const timeDiff = toDate - fromDate;
-                    daysToCharge = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-                } else {
-                    changeDateToInput.classList.add('input-error');
-                    return;
-                }
-                const extraCharge = (monthlyFeeNum / daysOfMonth) * daysToCharge;
-                daysToChargeResult.innerText = `${daysToCharge} Days`;
-                extraChargeResult.innerText = `$${formatNumber(extraCharge)}`;
-                daysToChargeResult.className = 'result-value positive';
-                extraChargeResult.className = 'result-value positive';
-            } else if ((changeDateFrom || changeDateTo) && isValid) {
-                if (!changeDateFrom) changeDateFromInput.classList.add('input-error');
-                if (!changeDateTo) changeDateToInput.classList.add('input-error');
             }
         }
 
@@ -849,6 +838,11 @@
                     field.addEventListener('input', function() {
                         formatInputNumber(this);
                     });
+                    field.addEventListener('change', function() {
+                        if (field.id === 'billingMonthlyFee' || field.id === 'remainingFee' || field.id === 'changeDateFrom' || field.id === 'changeDateTo') {
+                            calculateBillingAdjustment();
+                        }
+                    });
                 }
 
                 field.addEventListener('input', function() {
@@ -858,7 +852,7 @@
                         calculateEndDate();
                     } else if (field.id.includes('principal') || field.id.includes('months') || field.id.includes('rate')) {
                         calculateInterest();
-                    } else if (field.id.includes('billingMonthlyFee') || field.id.includes('remainingFee') || field.id.includes('billingDaysOfMonth') || field.id.includes('changeDateFrom') || field.id.includes('changeDateTo')) {
+                    } else if (field.id.includes('billingMonthlyFee') || field.id.includes('remainingFee') || field.id.includes('changeDateFrom') || field.id.includes('changeDateTo')) {
                         calculateBillingAdjustment();
                     }
                 });
