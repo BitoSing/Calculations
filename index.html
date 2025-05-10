@@ -83,15 +83,13 @@
         .calculator-card {
             background: white;
             border-radius: var(--border-radius);
-            box-shadow: var(--box-shadow);
-            padding: 15px; /* Reduced padding from 20px to 15px */
+            padding: 15px;
             transition: var(--transition);
-            border: 1px solid #e2e8f0;
         }
 
         .calculator-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+            transform: translateY(-8px); /* Increased from -3px to -8px */
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.13); /* More pronounced shadow */
         }
 
         h2 {
@@ -570,9 +568,9 @@
             const resultOfDiscount = document.getElementById('resultOfDiscount');
             const losingProfit = document.getElementById('losingProfit');
 
-            const originalPrice = parseFloat(stripSeparators(originalPriceInput.value)) || NaN;
-            const discountPercent = parseFloat(stripSeparators(discountPercentInput.value)) || NaN;
-            const priceAfterDiscount = parseFloat(stripSeparators(priceAfterDiscountInput.value)) || NaN;
+            const originalPrice = parseFloat(stripSeparators(originalPriceInput.value));
+            const discountPercent = parseFloat(stripSeparators(discountPercentInput.value));
+            const priceAfterDiscount = parseFloat(stripSeparators(priceAfterDiscountInput.value));
 
             // Reset error states
             originalPriceInput.classList.remove('input-error');
@@ -587,7 +585,7 @@
             losingProfit.className = 'result-value neutral';
 
             // Validate Original Price
-            if (isNaN(originalPrice) || originalPrice <= 0) {
+            if (originalPriceInput.value.trim() !== '' && (isNaN(originalPrice) || originalPrice <= 0)) {
                 originalPriceInput.classList.add('input-error');
                 return;
             }
@@ -595,11 +593,11 @@
             let isValid = true;
 
             // Validate inputs if provided
-            if (!isNaN(discountPercent) && discountPercent < 0) {
+            if (discountPercentInput.value.trim() !== '' && (isNaN(discountPercent) || discountPercent < 0)) {
                 discountPercentInput.classList.add('input-error');
                 isValid = false;
             }
-            if (!isNaN(priceAfterDiscount) && priceAfterDiscount < 0) {
+            if (priceAfterDiscountInput.value.trim() !== '' && (isNaN(priceAfterDiscount) || priceAfterDiscount < 0)) {
                 priceAfterDiscountInput.classList.add('input-error');
                 isValid = false;
             }
@@ -666,14 +664,19 @@
             startChargeDateInput.classList.remove('input-error');
             additionalDaysInput.classList.remove('input-error');
 
-            if (!startChargeDate || isNaN(monthRenew)) {
-                startChargeDateInput.classList.add('input-error', !startChargeDate);
+            if (startChargeDateInput.value.trim() !== '' && !startChargeDate) {
+                startChargeDateInput.classList.add('input-error');
                 document.getElementById('endDate').value = 'DD / MMM / YYYY';
                 return;
             }
 
-            if (isNaN(additionalDays)) {
+            if (additionalDaysInput.value.trim() !== '' && isNaN(additionalDays)) {
                 additionalDaysInput.classList.add('input-error');
+                document.getElementById('endDate').value = 'DD / MMM / YYYY';
+                return;
+            }
+
+            if (isNaN(monthRenew)) {
                 document.getElementById('endDate').value = 'DD / MMM / YYYY';
                 return;
             }
@@ -703,10 +706,14 @@
             monthsInput.classList.remove('input-error');
             rateInput.classList.remove('input-error');
 
-            if (isNaN(principal) || isNaN(months) || isNaN(rate) || principal <= 0 || months <= 0 || rate <= 0) {
-                principalInput.classList.add('input-error', isNaN(principal) || principal <= 0);
-                monthsInput.classList.add('input-error', isNaN(months) || months <= 0);
-                rateInput.classList.add('input-error', isNaN(rate) || rate <= 0);
+            if (
+                (principalInput.value.trim() !== '' && (isNaN(principal) || principal <= 0)) ||
+                (monthsInput.value.trim() !== '' && (isNaN(months) || months <= 0)) ||
+                (rateInput.value.trim() !== '' && (isNaN(rate) || rate <= 0))
+            ) {
+                if (principalInput.value.trim() !== '' && (isNaN(principal) || principal <= 0)) principalInput.classList.add('input-error');
+                if (monthsInput.value.trim() !== '' && (isNaN(months) || months <= 0)) monthsInput.classList.add('input-error');
+                if (rateInput.value.trim() !== '' && (isNaN(rate) || rate <= 0)) rateInput.classList.add('input-error');
                 interestResult.innerText = '$0.00';
                 totalResult.innerText = '$0.00';
                 interestResult.className = 'result-value neutral';
@@ -714,10 +721,14 @@
                 return;
             }
 
-            if (principal > 1e12 || months > 1e3 || rate > 1e3) {
-                principalInput.classList.add('input-error', principal > 1e12);
-                monthsInput.classList.add('input-error', months > 1e3);
-                rateInput.classList.add('input-error', rate > 1e3);
+            if (
+                (principalInput.value.trim() !== '' && principal > 1e12) ||
+                (monthsInput.value.trim() !== '' && months > 1e3) ||
+                (rateInput.value.trim() !== '' && rate > 1e3)
+            ) {
+                if (principalInput.value.trim() !== '' && principal > 1e12) principalInput.classList.add('input-error');
+                if (monthsInput.value.trim() !== '' && months > 1e3) monthsInput.classList.add('input-error');
+                if (rateInput.value.trim() !== '' && rate > 1e3) rateInput.classList.add('input-error');
                 interestResult.innerText = '$0.00';
                 totalResult.innerText = '$0.00';
                 interestResult.className = 'result-value neutral';
@@ -767,18 +778,23 @@
             const remainingFeeNum = parseFloat(remainingFee);
 
             let isValid = true;
-            if (isNaN(monthlyFeeNum) || monthlyFeeNum <= 0) {
+            if (monthlyFeeInput.value.trim() !== '' && (isNaN(monthlyFeeNum) || monthlyFeeNum <= 0)) {
                 monthlyFeeInput.classList.add('input-error');
                 isValid = false;
             }
-            if (monthlyFeeNum > 1e12) {
+            if (monthlyFeeInput.value.trim() !== '' && monthlyFeeNum > 1e12) {
                 monthlyFeeInput.classList.add('input-error');
                 isValid = false;
             }
 
-            if (isValid && (remainingFee === '' || isNaN(remainingFeeNum) || remainingFeeNum === 0)) {
+            if (
+                isValid &&
+                (remainingFeeInput.value.trim() === '' || isNaN(remainingFeeNum) || remainingFeeNum === 0)
+            ) {
                 const fromDate = parseCustomDate(changeDateFrom);
                 const toDate = parseCustomDate(changeDateTo);
+                if (changeDateFromInput.value.trim() !== '' && !fromDate) changeDateFromInput.classList.add('input-error');
+                if (changeDateToInput.value.trim() !== '' && !toDate) changeDateToInput.classList.add('input-error');
                 if (fromDate && toDate) {
                     if (toDate >= fromDate) {
                         const timeDiff = toDate - fromDate;
@@ -788,16 +804,18 @@
                         extraChargeResult.innerText = `$${formatNumber(extraCharge)}`;
                         daysToChargeResult.className = 'result-value positive';
                         extraChargeResult.className = 'result-value positive';
-                    } else {
+                    } else if (changeDateToInput.value.trim() !== '') {
                         changeDateToInput.classList.add('input-error');
                     }
-                } else {
-                    if (changeDateFrom && !fromDate) changeDateFromInput.classList.add('input-error');
-                    if (changeDateTo && !toDate) changeDateToInput.classList.add('input-error');
                 }
             }
 
-            if (isValid && !isNaN(remainingFeeNum) && remainingFeeNum >= 0) {
+            if (
+                isValid &&
+                remainingFeeInput.value.trim() !== '' &&
+                !isNaN(remainingFeeNum) &&
+                remainingFeeNum >= 0
+            ) {
                 if (remainingFeeNum > 1e12) {
                     remainingFeeInput.classList.add('input-error');
                 } else {
@@ -805,7 +823,7 @@
                     proRateDaysResult.innerText = `${Math.round(proRateDays)} Days`;
                     proRateDaysResult.className = 'result-value positive';
                 }
-            } else if (!isNaN(remainingFeeNum) && remainingFeeNum < 0) {
+            } else if (remainingFeeInput.value.trim() !== '' && !isNaN(remainingFeeNum) && remainingFeeNum < 0) {
                 remainingFeeInput.classList.add('input-error');
             }
         }
