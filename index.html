@@ -38,18 +38,19 @@
         }
 
         .container {
-            max-width: 1600px;
+            max-width: 1000px; /* Reduced from 1200px to 1000px */
             margin: 0 auto;
+            padding: 10px; /* Added padding for better spacing */
         }
 
         header {
             text-align: center;
-            margin-bottom: 30px;
-            padding: 20px 0;
+            margin-bottom: 15px;
+            padding: 10px 0;
         }
 
         h1 {
-            font-size: 2.2rem;
+            font-size: 1.8rem; /* Reduced font size from 2.2rem to 1.8rem */
             font-weight: 600;
             color: var(--secondary);
             margin-bottom: 8px;
@@ -63,8 +64,8 @@
 
         .calculator-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 25px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px; /* Reduced gap from 20px to 15px */
         }
 
         @media (max-width: 1200px) {
@@ -83,7 +84,7 @@
             background: white;
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
-            padding: 25px;
+            padding: 15px; /* Reduced padding from 20px to 15px */
             transition: var(--transition);
             border: 1px solid #e2e8f0;
         }
@@ -94,12 +95,12 @@
         }
 
         h2 {
-            font-size: 1.3rem;
-            margin-bottom: 20px;
+            font-size: 1.2rem; /* Reduced font size from 1.3rem to 1.2rem */
+            margin-bottom: 15px; /* Reduced margin from 20px to 15px */
             color: var(--secondary);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px; /* Reduced gap from 10px to 8px */
             font-weight: 600;
         }
 
@@ -139,8 +140,8 @@
 
         input, select {
             width: 100%;
-            padding: 12px 15px;
-            font-size: 0.95rem;
+            padding: 10px 12px; /* Reduced padding from 12px 15px to 10px 12px */
+            font-size: 0.9rem; /* Reduced font size from 0.95rem to 0.9rem */
             border: 1px solid #e2e8f0;
             border-radius: 8px;
             transition: var(--transition);
@@ -163,8 +164,8 @@
         .results {
             background-color: var(--primary-light);
             border-radius: var(--border-radius);
-            padding: 18px;
-            margin-top: 20px;
+            padding: 15px; /* Reduced padding from 18px to 15px */
+            margin-top: 15px; /* Reduced margin from 20px to 15px */
             border: 1px solid rgba(74, 111, 165, 0.2);
         }
 
@@ -172,7 +173,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
+            padding: 8px 0; /* Reduced padding from 10px to 8px */
         }
 
         .result-item:not(:last-child) {
@@ -181,12 +182,12 @@
 
         .result-label {
             font-weight: 500;
-            font-size: 0.95rem;
+            font-size: 0.9rem; /* Reduced font size from 0.95rem to 0.9rem */
         }
 
         .result-value {
             font-weight: 600;
-            font-size: 1.05rem;
+            font-size: 1rem; /* Reduced font size from 1.05rem to 1rem */
         }
 
         .positive {
