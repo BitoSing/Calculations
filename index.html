@@ -151,7 +151,8 @@
         input:focus, select:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-light);
+            box-shadow: 0 0 0 4px var(--primary-light); /* Increased from 3px to 4px */
+            border-width: 2px; /* Added for thicker border */
         }
 
         input.input-error {
@@ -559,7 +560,7 @@
             return date;
         }
 
-        function calculatePricing() {
+        function calculatePricing(triggeredBy) {
             const originalPriceInput = document.getElementById('originalPrice');
             const discountPercentInput = document.getElementById('discountPercent');
             const priceAfterDiscountInput = document.getElementById('priceAfterDiscount');
@@ -568,8 +569,8 @@
             const losingProfit = document.getElementById('losingProfit');
 
             const originalPrice = parseFloat(stripSeparators(originalPriceInput.value));
-            const discountPercent = parseFloat(stripSeparators(discountPercentInput.value));
-            const priceAfterDiscount = parseFloat(stripSeparators(priceAfterDiscountInput.value));
+            let discountPercent = parseFloat(stripSeparators(discountPercentInput.value));
+            let priceAfterDiscount = parseFloat(stripSeparators(priceAfterDiscountInput.value));
 
             // Reset error states
             originalPriceInput.classList.remove('input-error');
@@ -583,72 +584,58 @@
             resultOfDiscount.className = 'result-value neutral';
             losingProfit.className = 'result-value neutral';
 
-            // Validate Original Price
-            if (originalPriceInput.value.trim() !== '' && (isNaN(originalPrice) || originalPrice <= 0)) {
+            // Require valid original price
+            if (originalPriceInput.value.trim() === '' || isNaN(originalPrice) || originalPrice <= 0) {
                 originalPriceInput.classList.add('input-error');
                 return;
             }
 
-            let isValid = true;
-
-            // Validate inputs if provided
+            // Validate discount percent if provided
             if (discountPercentInput.value.trim() !== '' && (isNaN(discountPercent) || discountPercent < 0)) {
                 discountPercentInput.classList.add('input-error');
-                isValid = false;
+                return;
             }
+            // Validate sale price if provided
             if (priceAfterDiscountInput.value.trim() !== '' && (isNaN(priceAfterDiscount) || priceAfterDiscount < 0)) {
                 priceAfterDiscountInput.classList.add('input-error');
-                isValid = false;
-            }
-
-            // If any input is invalid, return early
-            if (!isValid) {
                 return;
             }
 
-            // Case 1: Both Sale Price and Discount Percentage provided
-            if (!isNaN(priceAfterDiscount) && !isNaN(discountPercent)) {
-                // Calculate expected Sale Price from Discount Percentage
-                const expectedPriceAfterDiscount = originalPrice * (1 - discountPercent / 100);
-                // Check consistency
-                if (Math.abs(expectedPriceAfterDiscount - priceAfterDiscount) > 0.01) {
-                    discountPercentInput.classList.add('input-error');
-                    priceAfterDiscountInput.classList.add('input-error');
-                    return;
-                }
-                // Proceed with Sale Price calculation
-                const calculatedDiscountPercent = ((originalPrice - priceAfterDiscount) / originalPrice) * 100;
-                const calculatedLosingProfit = originalPrice - priceAfterDiscount;
-
-                resultAfterDiscount.innerText = `$${formatNumber(priceAfterDiscount)}`;
-                resultOfDiscount.innerText = `${formatNumber(Math.abs(calculatedDiscountPercent), true)}%`;
-                losingProfit.innerText = `${calculatedLosingProfit > 0 ? '-' : '+'}$${formatNumber(Math.abs(calculatedLosingProfit))}`;
-
-                resultOfDiscount.className = calculatedDiscountPercent > 0 ? 'result-value positive' : calculatedDiscountPercent < 0 ? 'result-value negative' : 'result-value neutral';
-                losingProfit.className = calculatedLosingProfit > 0 ? 'result-value negative' : calculatedLosingProfit < 0 ? 'result-value positive' : 'result-value neutral';
+            // If both discount percent and sale price are empty, do nothing
+            if (
+                (discountPercentInput.value.trim() === '' || isNaN(discountPercent)) &&
+                (priceAfterDiscountInput.value.trim() === '' || isNaN(priceAfterDiscount))
+            ) {
+                return;
             }
-            // Case 2: Only Sale Price provided
-            else if (!isNaN(priceAfterDiscount)) {
-                const calculatedDiscountPercent = ((originalPrice - priceAfterDiscount) / originalPrice) * 100;
-                const calculatedLosingProfit = originalPrice - priceAfterDiscount;
 
-                resultAfterDiscount.innerText = `$${formatNumber(priceAfterDiscount)}`;
-                resultOfDiscount.innerText = `${formatNumber(Math.abs(calculatedDiscountPercent), true)}%`;
-                losingProfit.innerText = `${calculatedLosingProfit > 0 ? '-' : '+'}$${formatNumber(Math.abs(calculatedLosingProfit))}`;
-
-                resultOfDiscount.className = calculatedDiscountPercent > 0 ? 'result-value positive' : calculatedDiscountPercent < 0 ? 'result-value negative' : 'result-value neutral';
-                losingProfit.className = calculatedLosingProfit > 0 ? 'result-value negative' : calculatedLosingProfit < 0 ? 'result-value positive' : 'result-value neutral';
+            // If user edits discountPercent, update priceAfterDiscount
+            if (triggeredBy === 'discountPercent' && !isNaN(discountPercent)) {
+                priceAfterDiscount = originalPrice * (1 - discountPercent / 100);
+                // priceAfterDiscountInput.value = priceAfterDiscount >= 0 ? formatNumber(priceAfterDiscount) : '';
             }
-            // Case 3: Only Discount Percentage provided
-            else if (!isNaN(discountPercent)) {
-                const discountAmount = originalPrice * (discountPercent / 100);
-                const calculatedPriceAfterDiscount = originalPrice - discountAmount;
-                const calculatedLosingProfit = discountAmount;
+            // If user edits priceAfterDiscount, update discountPercent
+            else if (triggeredBy === 'priceAfterDiscount' && !isNaN(priceAfterDiscount)) {
+                discountPercent = ((originalPrice - priceAfterDiscount) / originalPrice) * 100;
+                // discountPercentInput.value = discountPercent >= 0 ? formatNumber(Math.abs(discountPercent), true) : '';
+            }
 
-                resultAfterDiscount.innerText = `$${formatNumber(calculatedPriceAfterDiscount)}`;
+            // Calculate and display results
+            if (!isNaN(priceAfterDiscount)) {
+                const calcDiscount = ((originalPrice - priceAfterDiscount) / originalPrice) * 100;
+                resultAfterDiscount.innerText = `$${formatNumber(priceAfterDiscount)}`;
+                resultOfDiscount.innerText = `${formatNumber(Math.abs(calcDiscount), true)}%`;
+                const profit = originalPrice - priceAfterDiscount;
+                losingProfit.innerText = `${profit > 0 ? '-' : '+'}$${formatNumber(Math.abs(profit))}`;
+                resultOfDiscount.className = calcDiscount > 0 ? 'result-value positive' : calcDiscount < 0 ? 'result-value negative' : 'result-value neutral';
+                losingProfit.className = profit > 0 ? 'result-value negative' : profit < 0 ? 'result-value positive' : 'result-value neutral';
+            } else if (!isNaN(discountPercent)) {
+                const calcPrice = originalPrice * (1 - discountPercent / 100);
+                resultAfterDiscount.innerText = `$${formatNumber(calcPrice)}`;
                 resultOfDiscount.innerText = `${formatNumber(discountPercent, true)}%`;
-                losingProfit.innerText = `-${formatNumber(calculatedLosingProfit)}`;
-                losingProfit.className = calculatedLosingProfit > 0 ? 'result-value negative' : 'result-value neutral';
+                const profit = originalPrice - calcPrice;
+                losingProfit.innerText = `-${formatNumber(profit)}`;
+                losingProfit.className = profit > 0 ? 'result-value negative' : 'result-value neutral';
             }
         }
 
@@ -867,17 +854,30 @@
                     });
                 }
 
-                field.addEventListener('input', function() {
-                    if (field.id.includes('originalPrice') || field.id.includes('discountPercent') || field.id.includes('priceAfterDiscount')) {
+                // Pricing Calculator: trigger calculation with info about which field changed
+                if (field.id === 'discountPercent') {
+                    field.addEventListener('input', function() {
+                        calculatePricing('discountPercent');
+                    });
+                } else if (field.id === 'priceAfterDiscount') {
+                    field.addEventListener('input', function() {
+                        calculatePricing('priceAfterDiscount');
+                    });
+                } else if (field.id === 'originalPrice') {
+                    field.addEventListener('input', function() {
                         calculatePricing();
-                    } else if (field.id.includes('startChargeDate') || field.id.includes('monthRenew') || field.id.includes('freeMonth') || field.id.includes('additionalDays')) {
-                        calculateEndDate();
-                    } else if (field.id.includes('principal') || field.id.includes('months') || field.id.includes('rate')) {
-                        calculateInterest();
-                    } else if (field.id.includes('billingMonthlyFee') || field.id.includes('remainingFee') || field.id.includes('changeDateFrom') || field.id.includes('changeDateTo')) {
-                        calculateBillingAdjustment();
-                    }
-                });
+                    });
+                } else {
+                    field.addEventListener('input', function() {
+                        if (field.id.includes('startChargeDate') || field.id.includes('monthRenew') || field.id.includes('freeMonth') || field.id.includes('additionalDays')) {
+                            calculateEndDate();
+                        } else if (field.id.includes('principal') || field.id.includes('months') || field.id.includes('rate')) {
+                            calculateInterest();
+                        } else if (field.id.includes('billingMonthlyFee') || field.id.includes('remainingFee') || field.id.includes('changeDateFrom') || field.id.includes('changeDateTo')) {
+                            calculateBillingAdjustment();
+                        }
+                    });
+                }
             });
 
             document.getElementById('billingDaysOfMonth').addEventListener('change', function() {
