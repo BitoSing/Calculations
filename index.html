@@ -976,7 +976,7 @@
             daysToChargeResult.className = 'result-value neutral';
             extraChargeResult.className = 'result-value neutral';
 
-            // Hide Days to Charge and Extra Charge by default
+            // Always show Days to Charge and Extra Charge by default
             daysToChargeResult.parentElement.style.display = '';
             extraChargeResult.parentElement.style.display = '';
 
@@ -1013,7 +1013,7 @@
                 return;
             }
 
-            // If remainingFee is filled, calculate pro-rated days, hide Days to Charge and Extra Charge
+            // If remainingFee is filled and valid, calculate pro-rated days, but do NOT hide Days to Charge and Extra Charge
             if (
                 isValid &&
                 remainingFeeInput.value.trim() !== '' &&
@@ -1026,11 +1026,8 @@
                     const proRateDays = (remainingFeeNum * daysOfMonth) / monthlyFeeNum;
                     proRateDaysResult.innerText = `${Math.round(proRateDays)} Days`;
                     proRateDaysResult.className = 'result-value positive';
-                    // Hide Days to Charge and Extra Charge
-                    daysToChargeResult.parentElement.style.display = 'none';
-                    extraChargeResult.parentElement.style.display = 'none';
                 }
-                return;
+                // Do not return here, allow date calculation below to also show
             } else if (remainingFeeInput.value.trim() !== '' && !isNaN(remainingFeeNum) && remainingFeeNum < 0) {
                 remainingFeeInput.classList.add('input-error');
             }
@@ -1038,7 +1035,11 @@
             // If charge date from/to is filled, calculate days to charge and extra charge
             const fromDate = parseCustomDate(changeDateFrom);
             const toDate = parseCustomDate(changeDateTo);
-            if (fromDate && toDate) {
+            if (
+                isValid &&
+                !isNaN(monthlyFeeNum) && monthlyFeeNum > 0 &&
+                fromDate && toDate
+            ) {
                 if (toDate >= fromDate) {
                     const timeDiff = toDate - fromDate;
                     const daysToCharge = Math.floor(timeDiff / (1000 * 60 * 60 * 24)) + 1;
@@ -1077,6 +1078,14 @@
                         calculateBillingAdjustment();
                     }
                 }
+            });
+
+            // Ensure calculation runs when date is changed by typing or picker
+            document.getElementById('changeDateFrom').addEventListener('change', function() {
+                calculateBillingAdjustment();
+            });
+            document.getElementById('changeDateTo').addEventListener('change', function() {
+                calculateBillingAdjustment();
             });
 
             calculateEndDate();
