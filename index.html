@@ -81,15 +81,54 @@
         }
 
         .calculator-card {
-            background: white;
-            border-radius: var(--border-radius);
-            padding: 15px;
-            transition: var(--transition);
+            background: rgba(255,255,255,0.75);
+            border-radius: 18px;
+            padding: 28px 22px 22px 22px;
+            box-shadow: 0 8px 32px 0 rgba(60, 80, 180, 0.10), 0 1.5px 6px 0 rgba(60, 80, 180, 0.06);
+            border: 1.5px solid rgba(74, 111, 165, 0.10);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            position: relative;
+            overflow: hidden;
+            transition: box-shadow 0.3s, transform 0.3s, background 0.3s;
+        }
+
+        .calculator-card::before {
+            content: "";
+            position: absolute;
+            top: -40px;
+            right: -40px;
+            width: 120px;
+            height: 120px;
+            background: radial-gradient(circle at 60% 40%, #e8f0fe 0%, rgba(74,111,165,0.08) 80%, transparent 100%);
+            opacity: 0.7;
+            z-index: 0;
+            pointer-events: none;
         }
 
         .calculator-card:hover {
-            transform: translateY(-8px); /* Increased from -3px to -8px */
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.13); /* More pronounced shadow */
+            box-shadow: 0 16px 48px 0 rgba(60, 80, 180, 0.16), 0 2px 8px 0 rgba(60, 80, 180, 0.10);
+            transform: translateY(-6px) scale(1.012);
+            background: rgba(255,255,255,0.92);
+        }
+
+        body.dark-mode .calculator-card {
+            background: rgba(45, 55, 72, 0.82);
+            border-color: rgba(74, 111, 165, 0.18);
+            box-shadow: 0 8px 32px 0 rgba(30, 41, 59, 0.18), 0 1.5px 6px 0 rgba(30, 41, 59, 0.10);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        body.dark-mode .calculator-card::before {
+            background: radial-gradient(circle at 60% 40%, #4a6fa5 0%, rgba(74,111,165,0.13) 80%, transparent 100%);
+            opacity: 0.5;
+        }
+
+        body.dark-mode .calculator-card:hover {
+            background: rgba(45, 55, 72, 0.96);
+            box-shadow: 0 16px 48px 0 rgba(30, 41, 59, 0.28), 0 2px 8px 0 rgba(30, 41, 59, 0.18);
+            transform: translateY(-6px) scale(1.012);
         }
 
         h2 {
@@ -120,6 +159,14 @@
             margin-bottom: 10px;
         }
 
+        .input-field label,
+        .billing-adjustment-fields label {
+            font-size: 0.93rem;
+            font-weight: 500;
+            color: var(--dark);
+            margin-bottom: 2px;
+        }
+
         label {
             display: block;
             margin-bottom: 8px;
@@ -129,17 +176,27 @@
         }
 
         .language-label {
+            display: inline;
             font-family: 'Khmer OS Siemreap', sans-serif;
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             color: var(--gray);
             margin-left: 5px;
             font-weight: 400;
+            line-height: 1.2;
+        }
+
+        input::placeholder, select:invalid {
+            color: #b0b7c3;
+            opacity: 1;
+            font-size: 0.85em;
+            font-style: italic;
+            letter-spacing: 0.01em;
         }
 
         input, select {
             width: 100%;
-            padding: 10px 12px; /* Reduced padding from 12px 15px to 10px 12px */
-            font-size: 0.9rem; /* Reduced font size from 0.95rem to 0.9rem */
+            padding: 8px 10px;
+            font-size: 0.89rem;
             border: 1px solid #e2e8f0;
             border-radius: 8px;
             transition: var(--transition);
@@ -268,17 +325,6 @@
             color: #e2e8f0;
         }
 
-        body.dark-mode .calculator-card {
-            background-color: #2d3748;
-            border-color: #4a5568;
-        }
-
-        body.dark-mode input, body.dark-mode select {
-            background-color: #4a5568;
-            border-color: #4a5568;
-            color: #e2e8f0;
-        }
-
         body.dark-mode .results {
             background-color: rgba(74, 111, 165, 0.2);
             border-color: rgba(74, 111, 165, 0.3);
@@ -295,6 +341,131 @@
         }
 
         body.dark-mode .subtitle {
+            color: #a0aec0;
+        }
+
+        /* Billing Adjustment Calculator Redesign */
+        .billing-adjustment-fields {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            margin-bottom: 10px;
+        }
+        .billing-row {
+            display: flex;
+            gap: 18px;
+            margin-bottom: 10px;
+        }
+        .billing-row:last-child {
+            margin-bottom: 0;
+        }
+        .billing-col {
+            flex: 1 1 0;
+            min-width: 0;
+            max-width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        @media (max-width: 1400px) {
+            .billing-row {
+                gap: 12px;
+            }
+        }
+        @media (max-width: 1200px) {
+            .billing-row {
+                gap: 8px;
+            }
+        }
+        @media (max-width: 900px) {
+            .billing-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            .billing-col {
+                min-width: 100%;
+                width: 100%;
+            }
+        }
+        @media (max-width: 600px) {
+            .billing-row {
+                flex-direction: column;
+                gap: 0;
+            }
+            .billing-col {
+                min-width: 100%;
+                width: 100%;
+            }
+        }
+        .billing-adjustment-fields label {
+            font-size: 0.93rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+        .billing-adjustment-fields input,
+        .billing-adjustment-fields select {
+            font-size: 0.89rem;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            background: var(--light);
+            color: var(--dark);
+            transition: var(--transition);
+            font-family: 'Inter', sans-serif;
+        }
+        .billing-adjustment-fields input:focus,
+        .billing-adjustment-fields select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-light);
+            border-width: 2px;
+        }
+        .billing-adjustment-fields input.input-error {
+            border-color: var(--danger);
+        }
+
+        .billing-results-card {
+            background: #e8f0fe;
+            border-radius: 14px;
+            border: 1.5px solid #cbd5e1;
+            padding: 18px 18px 10px 18px;
+            margin-top: 18px;
+            margin-bottom: 0;
+        }
+        .billing-result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.08rem;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+        .billing-result-row:last-child {
+            margin-bottom: 0;
+        }
+        .billing-result-label {
+            color: var(--secondary);
+            font-size: 1.01rem;
+        }
+        .billing-result-value {
+            font-weight: 700;
+            font-size: 1.09rem;
+            color: var(--gray);
+        }
+        .billing-result-value.positive {
+            color: #22c55e;
+        }
+        .billing-result-value.invalid {
+            color: var(--gray);
+        }
+
+        body.dark-mode .billing-results-card {
+            background: #22304a;
+            border-color: #334155;
+        }
+        body.dark-mode .billing-result-label {
+            color: #e2e8f0;
+        }
+        body.dark-mode .billing-result-value.invalid {
             color: #a0aec0;
         }
     </style>
@@ -321,15 +492,21 @@
                 </h2>
                 <div class="input-group">
                     <div class="input-field">
-                        <label for="originalPrice">Original Price <span class="language-label">ថ្លៃដើម</span></label>
+                        <label for="originalPrice">
+                            Original Price <span class="language-label">ថ្លៃដើម</span>
+                        </label>
                         <input type="text" id="originalPrice" placeholder="Enter amount ($)" pattern="[0-9,.]+">
                     </div>
                     <div class="input-field">
-                        <label for="discountPercent">Discount Percentage <span class="language-label">បញ្ចុះភាគរយ</span></label>
+                        <label for="discountPercent">
+                            Discount Percentage <span class="language-label">បញ្ចុះភាគរយ</span>
+                        </label>
                         <input type="text" id="discountPercent" placeholder="Enter percentage (%)" pattern="[0-9,.]+">
                     </div>
                     <div class="input-field">
-                        <label for="priceAfterDiscount">Sale Price <span class="language-label">តម្លៃលក់ចេញ</span></label>
+                        <label for="priceAfterDiscount">
+                            Sale Price <span class="language-label">តម្លៃលក់ចេញ</span>
+                        </label>
                         <input type="text" id="priceAfterDiscount" placeholder="Enter sale price ($)" pattern="[0-9,.]+">
                     </div>
                 </div>
@@ -363,19 +540,27 @@
                 </h2>
                 <div class="input-group">
                     <div class="input-field">
-                        <label for="startChargeDate">Start Date <span class="language-label">ថ្ងៃចាប់ផ្តើម</span></label>
+                        <label for="startChargeDate">
+                            Start Date <span class="language-label">ថ្ងៃចាប់ផ្តើម</span>
+                        </label>
                         <input type="text" id="startChargeDate" placeholder="DD / MMM / YYYY" class="date-picker">
                     </div>
                     <div class="input-field">
-                        <label for="monthRenew">Billing Months <span class="language-label">ខែបន្ត</span></label>
+                        <label for="monthRenew">
+                            Billing Months <span class="language-label">ខែបន្ត</span>
+                        </label>
                         <input type="text" id="monthRenew" placeholder="Enter months" pattern="[0-9,.]+">
                     </div>
                     <div class="input-field">
-                        <label for="freeMonth">Free Months <span class="language-label">ខែបន្ថែម</span></label>
+                        <label for="freeMonth">
+                            Free Months <span class="language-label">ខែបន្ថែម</span>
+                        </label>
                         <input type="text" id="freeMonth" placeholder="Enter free months" pattern="[0-9,.]+">
                     </div>
                     <div class="input-field">
-                        <label for="additionalDays">Days Adjustment <span class="language-label">ថ្ងៃបន្ថែម</span></label>
+                        <label for="additionalDays">
+                            Days Adjustment <span class="language-label">ថ្ងៃបន្ថែម</span>
+                        </label>
                         <input type="text" id="additionalDays" placeholder="Enter days (use - to subtract)" pattern="[-]?[0-9]+">
                     </div>
                 </div>
@@ -397,45 +582,67 @@
                     </span>
                     Billing Adjustment Calculator
                 </h2>
-                <div class="input-group">
-                    <div class="input-field">
-                        <label for="billingMonthlyFee">Monthly Fee <span class="language-label">ថ្លៃប្រចាំខែ</span></label>
-                        <input type="text" id="billingMonthlyFee" placeholder="Enter monthly fee ($)" pattern="[0-9,.]+" data-step="0.01">
+                <div class="billing-adjustment-fields">
+                    <div class="billing-row">
+                        <div class="billing-col">
+                            <label for="billingMonthlyFee">
+                                Monthly Fee <span class="language-label">ថ្លៃប្រចាំខែ</span>
+                            </label>
+                            <input type="text" id="billingMonthlyFee" placeholder="Enter monthly fee ($)" pattern="[0-9,.]+" data-step="0.01">
+                        </div>
+                        <div class="billing-col">
+                            <label for="remainingFee">
+                                Remaining Fee <span class="language-label">ថ្លៃនៅសល់</span>
+                            </label>
+                            <input type="text" id="remainingFee" placeholder="Enter remaining fee ($)" pattern="[0-9,.]+" data-step="0.01">
+                        </div>
                     </div>
-                    <div class="input-field">
-                        <label for="billingDaysOfMonth">Days in Month <span class="language-label">ថ្ងៃក្នុងខែ</span></label>
-                        <select id="billingDaysOfMonth">
-                            <option value="31">31 Days</option>
-                            <option value="30">30 Days</option>
-                            <option value="29">29 Days</option>
-                            <option value="28">28 Days</option>
-                        </select>
+                    <div class="billing-row">
+                        <div class="billing-col">
+                            <label for="changeDateFrom">
+                                From Date <span class="language-label">ផ្លាស់ប្តូរថ្ងៃពី</span>
+                            </label>
+                            <input type="text" id="changeDateFrom" placeholder="DD / MMM / YYYY" class="date-picker">
+                        </div>
+                        <div class="billing-col">
+                            <label for="changeDateTo">
+                                To Date <span class="language-label">ផ្លាស់ប្តូរថ្ងៃមកដល់</span>
+                            </label>
+                            <input type="text" id="changeDateTo" placeholder="DD / MMM / YYYY" class="date-picker">
+                        </div>
                     </div>
-                    <div class="input-field">
-                        <label for="remainingFee">Remaining Fee <span class="language-label">ថ្លៃនៅសល់</span></label>
-                        <input type="text" id="remainingFee" placeholder="Enter remaining fee ($)" pattern="[0-9,.]+" data-step="0.01">
-                    </div>
-                    <div class="input-field">
-                        <label for="changeDateFrom">Charge Date From <span class="language-label">ផ្លាស់ប្តូរកាលបរិច្ឆេទពី</span></label>
-                        <input type="text" id="changeDateFrom" placeholder="DD / MMM / YYYY" class="date-picker">
-                    </div>
-                    <div class="input-field">
-                        <label for="changeDateTo">Charge Date To <span class="language-label">ផ្លាស់ប្តូរកាលបរិច្ឆេទទៅ</span></label>
-                        <input type="text" id="changeDateTo" placeholder="DD / MMM / YYYY" class="date-picker">
+                    <div class="billing-row">
+                        <div class="billing-col">
+                            <label for="billingDaysOfMonth">
+                                Days in Month <span class="language-label">ថ្ងៃក្នុងខែ</span>
+                            </label>
+                            <select id="billingDaysOfMonth">
+                                <option value="31">31 Days</option>
+                                <option value="30">30 Days</option>
+                                <option value="29">29 Days</option>
+                                <option value="28">28 Days</option>
+                            </select>
+                        </div>
+                        <div class="billing-col">
+                            <label for="daysToProRate">
+                                Days to charge <span class="language-label">ថ្ងៃត្រូវគិត</span>
+                            </label>
+                            <input type="text" id="daysToProRate" placeholder="Enter days" pattern="[0-9]+" data-step="1">
+                        </div>
                     </div>
                 </div>
-                <div class="results">
-                    <div class="result-item">
-                        <span class="result-label">Pro-Rated Days <span class="language-label">ថ្ងៃបន្ថែម</span>:</span>
-                        <span class="result-value neutral" id="proRateDays">0 Days</span>
+                <div class="billing-results-card">
+                    <div class="billing-result-row">
+                        <span class="billing-result-label">Pro-Rated Days <span class="language-label">ថ្ងៃបន្ថែម</span>:</span>
+                        <span class="billing-result-value" id="proRateDays">0 Days</span>
                     </div>
-                    <div class="result-item">
-                        <span class="result-label">Days to Charge <span class="language-label">ថ្ងៃត្រូវគិតថ្លៃ</span>:</span>
-                        <span class="result-value neutral" id="daysToChargeResult">0 Days</span>
+                    <div class="billing-result-row">
+                        <span class="billing-result-label">Days to Charge <span class="language-label">ថ្ងៃត្រូវគិតថ្លៃ</span>:</span>
+                        <span class="billing-result-value" id="daysToChargeResult">0 Days</span>
                     </div>
-                    <div class="result-item">
-                        <span class="result-label">Extra Charge <span class="language-label">ថ្លៃបន្ថែម</span>:</span>
-                        <span class="result-value neutral" id="extraCharge">$0.00</span>
+                    <div class="billing-result-row">
+                        <span class="billing-result-label">Extra Charge <span class="language-label">ថ្លៃបន្ថែម</span>:</span>
+                        <span class="billing-result-value" id="extraCharge">$0.00</span>
                     </div>
                 </div>
             </div>
@@ -452,15 +659,21 @@
                 </h2>
                 <div class="input-group">
                     <div class="input-field">
-                        <label for="principal">Deposit Amount <span class="language-label">ចំនួនប្រាក់បញ្ញើ</span></label>
+                        <label for="principal">
+                            Deposit Amount <span class="language-label">ចំនួនប្រាក់បញ្ញើ</span>
+                        </label>
                         <input type="text" id="principal" placeholder="Enter amount ($)" pattern="[0-9,.]+" data-step="0.01">
                     </div>
                     <div class="input-field">
-                        <label for="months">Deposit Duration <span class="language-label">រយៈពេលបញ្ញើ (ខែ)</span></label>
+                        <label for="months">
+                            Deposit Duration <span class="language-label">រយៈពេលបញ្ញើ (ខែ)</span>
+                        </label>
                         <input type="text" id="months" placeholder="Enter months" pattern="[0-9,.]+" data-step="1">
                     </div>
                     <div class="input-field">
-                        <label for="rate">Interest Rate <span class="language-label">អត្រាការប្រាក់ (%)</span></label>
+                        <label for="rate">
+                            Interest Rate <span class="language-label">អត្រាការប្រាក់ (%)</span>
+                        </label>
                         <input type="text" id="rate" placeholder="Enter rate (%)" pattern="[0-9,.]+" data-step="0.01">
                     </div>
                 </div>
@@ -736,6 +949,7 @@
             const monthlyFeeInput = document.getElementById('billingMonthlyFee');
             const daysOfMonthInput = document.getElementById('billingDaysOfMonth');
             const remainingFeeInput = document.getElementById('remainingFee');
+            const daysToProRateInput = document.getElementById('daysToProRate');
             const changeDateFromInput = document.getElementById('changeDateFrom');
             const changeDateToInput = document.getElementById('changeDateTo');
             const proRateDaysResult = document.getElementById('proRateDays');
@@ -745,11 +959,13 @@
             const monthlyFee = stripSeparators(monthlyFeeInput.value);
             const daysOfMonth = parseInt(daysOfMonthInput.value);
             const remainingFee = stripSeparators(remainingFeeInput.value);
+            const daysToProRate = parseInt(stripSeparators(daysToProRateInput.value));
             const changeDateFrom = changeDateFromInput.value.trim();
             const changeDateTo = changeDateToInput.value.trim();
 
             monthlyFeeInput.classList.remove('input-error');
             remainingFeeInput.classList.remove('input-error');
+            daysToProRateInput.classList.remove('input-error');
             changeDateFromInput.classList.remove('input-error');
             changeDateToInput.classList.remove('input-error');
 
@@ -759,6 +975,10 @@
             proRateDaysResult.className = 'result-value neutral';
             daysToChargeResult.className = 'result-value neutral';
             extraChargeResult.className = 'result-value neutral';
+
+            // Hide Days to Charge and Extra Charge by default
+            daysToChargeResult.parentElement.style.display = '';
+            extraChargeResult.parentElement.style.display = '';
 
             const monthlyFeeNum = parseFloat(monthlyFee);
             const remainingFeeNum = parseFloat(remainingFee);
@@ -773,29 +993,27 @@
                 isValid = false;
             }
 
+            // Days to Pro Rate logic (new column)
             if (
                 isValid &&
-                (remainingFeeInput.value.trim() === '' || isNaN(remainingFeeNum) || remainingFeeNum === 0)
+                daysToProRateInput.value.trim() !== '' &&
+                !isNaN(daysToProRate) &&
+                daysToProRate > 0
             ) {
-                const fromDate = parseCustomDate(changeDateFrom);
-                const toDate = parseCustomDate(changeDateTo);
-                if (changeDateFromInput.value.trim() !== '' && !fromDate) changeDateFromInput.classList.add('input-error');
-                if (changeDateToInput.value.trim() !== '' && !toDate) changeDateToInput.classList.add('input-error');
-                if (fromDate && toDate) {
-                    if (toDate >= fromDate) {
-                        const timeDiff = toDate - fromDate;
-                        const daysToCharge = Math.floor(timeDiff / (1000 * 60 * 60 * 24)) + 1;
-                        const extraCharge = (monthlyFeeNum / daysOfMonth) * daysToCharge;
-                        daysToChargeResult.innerText = `${daysToCharge} Days`;
-                        extraChargeResult.innerText = `$${formatNumber(extraCharge)}`;
-                        daysToChargeResult.className = 'result-value positive';
-                        extraChargeResult.className = 'result-value positive';
-                    } else if (changeDateToInput.value.trim() !== '') {
-                        changeDateToInput.classList.add('input-error');
-                    }
-                }
+                // Calculate extra charge based on daysToProRate
+                const extraCharge = (monthlyFeeNum / daysOfMonth) * daysToProRate;
+                proRateDaysResult.innerText = `${daysToProRate} Days`;
+                proRateDaysResult.className = 'result-value positive';
+                extraChargeResult.innerText = `$${formatNumber(extraCharge)}`;
+                extraChargeResult.className = 'result-value positive';
+                daysToChargeResult.innerText = `${daysToProRate} Days`;
+                daysToChargeResult.className = 'result-value positive';
+                daysToChargeResult.parentElement.style.display = '';
+                extraChargeResult.parentElement.style.display = '';
+                return;
             }
 
+            // If remainingFee is filled, calculate pro-rated days, hide Days to Charge and Extra Charge
             if (
                 isValid &&
                 remainingFeeInput.value.trim() !== '' &&
@@ -808,9 +1026,32 @@
                     const proRateDays = (remainingFeeNum * daysOfMonth) / monthlyFeeNum;
                     proRateDaysResult.innerText = `${Math.round(proRateDays)} Days`;
                     proRateDaysResult.className = 'result-value positive';
+                    // Hide Days to Charge and Extra Charge
+                    daysToChargeResult.parentElement.style.display = 'none';
+                    extraChargeResult.parentElement.style.display = 'none';
                 }
+                return;
             } else if (remainingFeeInput.value.trim() !== '' && !isNaN(remainingFeeNum) && remainingFeeNum < 0) {
                 remainingFeeInput.classList.add('input-error');
+            }
+
+            // If charge date from/to is filled, calculate days to charge and extra charge
+            const fromDate = parseCustomDate(changeDateFrom);
+            const toDate = parseCustomDate(changeDateTo);
+            if (fromDate && toDate) {
+                if (toDate >= fromDate) {
+                    const timeDiff = toDate - fromDate;
+                    const daysToCharge = Math.floor(timeDiff / (1000 * 60 * 60 * 24)) + 1;
+                    const extraCharge = (monthlyFeeNum / daysOfMonth) * daysToCharge;
+                    daysToChargeResult.innerText = `${daysToCharge} Days`;
+                    extraChargeResult.innerText = `$${formatNumber(extraCharge)}`;
+                    daysToChargeResult.className = 'result-value positive';
+                    extraChargeResult.className = 'result-value positive';
+                    daysToChargeResult.parentElement.style.display = '';
+                    extraChargeResult.parentElement.style.display = '';
+                } else if (changeDateToInput.value.trim() !== '') {
+                    changeDateToInput.classList.add('input-error');
+                }
             }
         }
 
@@ -843,12 +1084,18 @@
 
             const inputFields = document.querySelectorAll('input, select');
             inputFields.forEach(field => {
-                if (field.type === 'text' && (field.pattern === '[0-9,.]+' || field.id === 'additionalDays')) {
+                if (field.type === 'text' && (field.pattern === '[0-9,.]+' || field.id === 'additionalDays' || field.id === 'daysToProRate')) {
                     field.addEventListener('input', function() {
                         formatInputNumber(this);
                     });
                     field.addEventListener('change', function() {
-                        if (field.id === 'billingMonthlyFee' || field.id === 'remainingFee' || field.id === 'changeDateFrom' || field.id === 'changeDateTo') {
+                        if (
+                            field.id === 'billingMonthlyFee' ||
+                            field.id === 'remainingFee' ||
+                            field.id === 'changeDateFrom' ||
+                            field.id === 'changeDateTo' ||
+                            field.id === 'daysToProRate'
+                        ) {
                             calculateBillingAdjustment();
                         }
                     });
@@ -873,7 +1120,7 @@
                             calculateEndDate();
                         } else if (field.id.includes('principal') || field.id.includes('months') || field.id.includes('rate')) {
                             calculateInterest();
-                        } else if (field.id.includes('billingMonthlyFee') || field.id.includes('remainingFee') || field.id.includes('changeDateFrom') || field.id.includes('changeDateTo')) {
+                        } else if (field.id.includes('billingMonthlyFee') || field.id.includes('remainingFee') || field.id.includes('changeDateFrom') || field.id.includes('changeDateTo') || field.id.includes('daysToProRate')) {
                             calculateBillingAdjustment();
                         }
                     });
@@ -881,6 +1128,10 @@
             });
 
             document.getElementById('billingDaysOfMonth').addEventListener('change', function() {
+                calculateBillingAdjustment();
+            });
+            // recalculate when Days to Pro Rate changes
+            document.getElementById('daysToProRate').addEventListener('input', function() {
                 calculateBillingAdjustment();
             });
         });
