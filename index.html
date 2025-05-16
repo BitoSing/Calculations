@@ -90,26 +90,7 @@
             -webkit-backdrop-filter: blur(8px);
             position: relative;
             overflow: hidden;
-            transition: box-shadow 0.3s, transform 0.3s, background 0.3s;
-        }
-
-        .calculator-card::before {
-            content: "";
-            position: absolute;
-            top: -40px;
-            right: -40px;
-            width: 120px;
-            height: 120px;
-            background: radial-gradient(circle at 60% 40%, #e8f0fe 0%, rgba(74,111,165,0.08) 80%, transparent 100%);
-            opacity: 0.7;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        .calculator-card:hover {
-            box-shadow: 0 16px 48px 0 rgba(60, 80, 180, 0.16), 0 2px 8px 0 rgba(60, 80, 180, 0.10);
-            transform: translateY(-6px) scale(1.012);
-            background: rgba(255,255,255,0.92);
+            transition: none; /* Remove hover transition */
         }
 
         body.dark-mode .calculator-card {
@@ -118,17 +99,7 @@
             box-shadow: 0 8px 32px 0 rgba(30, 41, 59, 0.18), 0 1.5px 6px 0 rgba(30, 41, 59, 0.10);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-        }
-
-        body.dark-mode .calculator-card::before {
-            background: radial-gradient(circle at 60% 40%, #4a6fa5 0%, rgba(74,111,165,0.13) 80%, transparent 100%);
-            opacity: 0.5;
-        }
-
-        body.dark-mode .calculator-card:hover {
-            background: rgba(45, 55, 72, 0.96);
-            box-shadow: 0 16px 48px 0 rgba(30, 41, 59, 0.28), 0 2px 8px 0 rgba(30, 41, 59, 0.18);
-            transform: translateY(-6px) scale(1.012);
+            transition: none; /* Remove hover transition */
         }
 
         h2 {
@@ -648,7 +619,7 @@
             </div>
 
             <!-- Interest Calculator -->
-            <div class="calculator-card">
+            <div class="calculator-card" style="display: none;">
                 <h2>
                     <span class="icon-container">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -657,36 +628,6 @@
                     </span>
                     Interest Calculator
                 </h2>
-                <div class="input-group">
-                    <div class="input-field">
-                        <label for="principal">
-                            Deposit Amount <span class="language-label">ចំនួនប្រាក់បញ្ញើ</span>
-                        </label>
-                        <input type="text" id="principal" placeholder="Enter amount ($)" pattern="[0-9,.]+" data-step="0.01">
-                    </div>
-                    <div class="input-field">
-                        <label for="months">
-                            Deposit Duration <span class="language-label">រយៈពេលបញ្ញើ (ខែ)</span>
-                        </label>
-                        <input type="text" id="months" placeholder="Enter months" pattern="[0-9,.]+" data-step="1">
-                    </div>
-                    <div class="input-field">
-                        <label for="rate">
-                            Interest Rate <span class="language-label">អត្រាការប្រាក់ (%)</span>
-                        </label>
-                        <input type="text" id="rate" placeholder="Enter rate (%)" pattern="[0-9,.]+" data-step="0.01">
-                    </div>
-                </div>
-                <div class="results">
-                    <div class="result-item">
-                        <span class="result-label">Interest Earned <span class="language-label">ការប្រាក់</span>:</span>
-                        <span class="result-value neutral" id="interestResult">$0.00</span>
-                    </div>
-                    <div class="result-item">
-                        <span class="result-label">Total Amount <span class="language-label">សរុប</span>:</span>
-                        <span class="result-value neutral" id="totalResult">$0.00</span>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
